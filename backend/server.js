@@ -1,13 +1,16 @@
 import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
 
-// Datos iniciales de la APII
+// Base de datos en memoria
 let products = [
   { id: 1, nombre: 'Consola PlayStation 5', categoria: 'Consolas', precio: 549990, oferta: true, precioOferta: 499990, imagen: 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=500' },
   { id: 2, nombre: 'Juego Nintendo Switch Zelda', categoria: 'Juegos', precio: 59990, oferta: false, precioOferta: 0, imagen: 'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=500' },
@@ -19,20 +22,74 @@ let products = [
 
 let orders = [];
 
-// Endpoints de la API
-app.get('/api/products', (req, res) => res.json(products));
-app.get('/api/orders', (req, res) => res.json(orders));
+// --- ENDPOINTS PRODUCTOS ---
+
+app.get('/api/products', (req, res) => {
+  res.json(products);
+});
 
 app.post('/api/products', (req, res) => {
-  const newProduct = { id: Date.now(), ...req.body };
+  const { nombre, categoria, precio, oferta, precioOferta, imagen } = req.body;
+
+  // Validación de campos requeridos
+  if (!nombre || !categoria || !precio) {
+    return res.status(400).json({ error: 'Nombre, categoría y precio son obligatorios.' });
+  }
+
+  if (Number(precio) <= 0) {
+    return res.status(400).json({ error: 'El precio debe ser un número positivo.' });
+  }
+
+  const newProduct = {
+    id: Date.now(),
+    nombre: String(nombre).trim(),
+    categoria: String(categoria).trim(),
+    precio: Number(precio),
+    oferta: Boolean(oferta),
+    precioOferta: oferta ? Number(precioOferta || 0) : 0,
+    imagen: imagen || 'https://via.placeholder.com/500'
+  };
+
   products.push(newProduct);
   res.status(201).json(newProduct);
 });
 
+app.delete('/api/products/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const index = products.findIndex(p => p.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Producto no encontrado.' });
+  }
+
+  products.splice(index, 1);
+  res.json({ message: 'Producto eliminado con éxito.' });
+});
+
+// --- ENDPOINTS ÓRDENES ---
+
+app.get('/api/orders', (req, res) => {
+  res.json(orders);
+});
+
 app.post('/api/orders', (req, res) => {
-  const newOrder = { id: Date.now(), fecha: new Date().toLocaleDateString('es-CL'), ...req.body };
+  const { cliente, items, total } = req.body;
+
+  if (!cliente || !items || !Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'La orden debe incluir datos del cliente y al menos un producto.' });
+  }
+
+  const newOrder = {
+    id: Date.now(),
+    fecha: new Date().toLocaleDateString('es-CL'),
+    cliente,
+    items,
+    total: Number(total || 0)
+  };
+
   orders.push(newOrder);
   res.status(201).json(newOrder);
 });
 
-app.listen(PORT, () => console.log(`Servidor Backend corriendo en http://localhost:${PORT}`));
+// Iniciar servidor
+app.listen(PORT, () => console.log(`Backend activo en http://localhost:${PORT}`));
