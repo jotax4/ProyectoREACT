@@ -7,7 +7,7 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
-// Datos iniciales de la API
+// Datos iniciales de la APII
 let products = [
   { id: 1, nombre: 'Consola PlayStation 5', categoria: 'Consolas', precio: 549990, oferta: true, precioOferta: 499990, imagen: 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=500' },
   { id: 2, nombre: 'Juego Nintendo Switch Zelda', categoria: 'Juegos', precio: 59990, oferta: false, precioOferta: 0, imagen: 'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=500' },
