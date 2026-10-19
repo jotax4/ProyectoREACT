@@ -1,15 +1,18 @@
+// frontend/src/components/Navbar.jsx
 import React from 'react';
 
-export const Navbar = ({ currentView, setCurrentView, cartCount }) => {
+export const Navbar = ({ currentView, setCurrentView, cartCount, user, onLogout }) => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
       <div className="container">
-        <button 
-          className="navbar-brand btn btn-link text-white fw-bold fs-4 text-decoration-none" 
-          onClick={() => setCurrentView('home')}
+        <a 
+          className="navbar-brand fw-bold" 
+          href="#home" 
+          onClick={(e) => { e.preventDefault(); setCurrentView('home'); }}
         >
-          MiTienda
-        </button>
+          🎮 Mi Tienda Gamer
+        </a>
+
         <button 
           className="navbar-toggler" 
           type="button" 
@@ -20,18 +23,18 @@ export const Navbar = ({ currentView, setCurrentView, cartCount }) => {
         </button>
 
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav me-auto">
+          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <button 
-                className={`nav-link btn btn-link ${currentView === 'home' ? 'active' : ''}`}
+                className={`nav-link btn btn-link ${currentView === 'home' ? 'active fw-bold' : ''}`}
                 onClick={() => setCurrentView('home')}
               >
-                Home
+                Inicio
               </button>
             </li>
             <li className="nav-item">
               <button 
-                className={`nav-link btn btn-link ${currentView === 'categorias' ? 'active' : ''}`}
+                className={`nav-link btn btn-link ${currentView === 'categorias' ? 'active fw-bold' : ''}`}
                 onClick={() => setCurrentView('categorias')}
               >
                 Categorías
@@ -39,17 +42,26 @@ export const Navbar = ({ currentView, setCurrentView, cartCount }) => {
             </li>
             <li className="nav-item">
               <button 
-                className={`nav-link btn btn-link ${currentView === 'ofertas' ? 'active' : ''}`}
+                className={`nav-link btn btn-link ${currentView === 'ofertas' ? 'active fw-bold' : ''}`}
                 onClick={() => setCurrentView('ofertas')}
               >
                 Ofertas
               </button>
             </li>
+            <li className="nav-item">
+              <button 
+                className={`nav-link btn btn-link ${currentView === 'admin' ? 'active fw-bold' : ''}`}
+                onClick={() => setCurrentView('admin')}
+              >
+                Admin
+              </button>
+            </li>
           </ul>
 
-          <div className="d-flex align-items-center gap-2">
+          <div className="d-flex align-items-center gap-3">
+            {/* Botón Carrito */}
             <button 
-              className="btn btn-success position-relative"
+              className={`btn btn-outline-light position-relative ${currentView === 'cart' ? 'active' : ''}`}
               onClick={() => setCurrentView('cart')}
             >
               🛒 Carrito
@@ -59,12 +71,28 @@ export const Navbar = ({ currentView, setCurrentView, cartCount }) => {
                 </span>
               )}
             </button>
-            <button 
-              className="btn btn-outline-light ms-2"
-              onClick={() => setCurrentView('admin')}
-            >
-              ⚙️ Admin
-            </button>
+
+            {/* Gestión de Sesión de Usuario */}
+            {user ? (
+              <div className="d-flex align-items-center gap-2">
+                <span className="text-light small">
+                  👤 Hola, <strong>{user.nombre}</strong>
+                </span>
+                <button 
+                  className="btn btn-sm btn-outline-danger" 
+                  onClick={onLogout}
+                >
+                  Salir
+                </button>
+              </div>
+            ) : (
+              <button 
+                className={`btn btn-primary ${currentView === 'login' ? 'active' : ''}`}
+                onClick={() => setCurrentView('login')}
+              >
+                Iniciar Sesión
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -198,5 +198,10 @@ export const Auth = ({ onLoginSuccess }) => {
         </button>
       </p>
     </div>
+    
   );
+  
 };
+
+// Agregar esta línea al final de Auth.jsx
+export default Auth;

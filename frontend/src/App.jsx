@@ -8,36 +8,55 @@ import { PaymentFailure } from './pages/PaymentFailure';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { Categorias } from './pages/Categorias';
 import { Ofertas } from './pages/Ofertas';
-import { storeService } from './services/storeService';
+import { Auth } from './pages/Auth';
+
+// Importación de los servicios desacoplados
+import { cartService } from './services/cartService';
+import { orderService } from './services/orderService';
+import { authService } from './services/authService';
 
 export function App() {
   const [currentView, setCurrentView] = useState('home');
   const [cart, setCart] = useState([]);
   const [lastOrder, setLastOrder] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    setCart(storeService.getCart());
+    setCart(cartService.getCart());
+    setUser(authService.getCurrentUser());
   }, []);
 
   const handleAddToCart = (product) => {
-    storeService.addToCart(product);
-    setCart(storeService.getCart());
+    cartService.addToCart(product);
+    setCart(cartService.getCart());
   };
 
   const handleRemoveFromCart = (id) => {
-    storeService.removeFromCart(id);
-    setCart(storeService.getCart());
+    cartService.removeFromCart(id);
+    setCart(cartService.getCart());
   };
 
-  const handleCompleteOrder = (orderData) => {
-    const createdOrder = storeService.createOrder(orderData);
-    setLastOrder(createdOrder);
+  const handleCompleteOrder = async (orderData) => {
+    const createdOrder = await orderService.createOrder(orderData);
+    setLastOrder(createdOrder || orderData);
+    cartService.clearCart();
     setCart([]);
     setCurrentView('payment-success');
   };
 
   const handleFailOrder = () => {
     setCurrentView('payment-failure');
+  };
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    setCurrentView('home');
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setUser(null);
+    setCurrentView('home');
   };
 
   const cartCount = cart.reduce((acc, item) => acc + item.cantidad, 0);
@@ -47,13 +66,16 @@ export function App() {
       <Navbar 
         currentView={currentView} 
         setCurrentView={setCurrentView} 
-        cartCount={cartCount} 
+        cartCount={cartCount}
+        user={user}
+        onLogout={handleLogout}
       />
 
       <div className="container pb-5">
         {currentView === 'home' && <Home onAddToCart={handleAddToCart} />}
         {currentView === 'categorias' && <Categorias onAddToCart={handleAddToCart} />}
         {currentView === 'ofertas' && <Ofertas onAddToCart={handleAddToCart} />}
+        {currentView === 'login' && <Auth onLoginSuccess={handleLoginSuccess} />}
         
         {currentView === 'cart' && (
           <Cart 
@@ -67,6 +89,7 @@ export function App() {
         {currentView === 'checkout' && (
           <Checkout 
             cartItems={cart} 
+            user={user}
             onCompleteOrder={handleCompleteOrder}
             onFailOrder={handleFailOrder}
             onBackToCart={() => setCurrentView('cart')}
