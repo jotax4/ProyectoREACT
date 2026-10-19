@@ -93,3 +93,49 @@ app.post('/api/orders', (req, res) => {
 
 // Iniciar servidor
 app.listen(PORT, () => console.log(`Backend activo en http://localhost:${PORT}`));
+
+// --- ENDPOINTS AUTENTICACIÓN ---
+
+let users = []; // Base de datos simulada en memoria
+
+app.post('/api/auth/register', (req, res) => {
+  const { nombre, email, password } = req.body;
+
+  if (!nombre || !email || !password) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
+  }
+
+  const existingUser = users.find(u => u.email === email.trim().toLowerCase());
+  if (existingUser) {
+    return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
+  }
+
+  const newUser = {
+    id: Date.now(),
+    nombre: String(nombre).trim(),
+    email: String(email).trim().toLowerCase(),
+    password: String(password)
+  };
+
+  users.push(newUser);
+  res.status(201).json({ message: 'Usuario registrado exitosamente.' });
+});
+
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Correo y contraseña obligatorios.' });
+  }
+
+  const user = users.find(u => u.email === email.trim().toLowerCase() && u.password === password);
+
+  if (!user) {
+    return res.status(401).json({ error: 'Credenciales incorrectas.' });
+  }
+
+  res.json({
+    token: `fake-jwt-token-${user.id}`,
+    user: { id: user.id, nombre: user.nombre, email: user.email }
+  });
+});
