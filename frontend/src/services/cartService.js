@@ -24,4 +24,4 @@ export const cartService = {
   clearCart: () => {
     localStorage.removeItem('cart');
   }
-};
+}; 
