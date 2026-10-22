@@ -8,13 +8,29 @@ export const Auth = ({ onLoginSuccess }) => {
     nombre: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    fechaNacimiento: '' // Campo agregado para la fecha de nacimiento
   });
 
   const [errors, setErrors] = useState({});
   const [serverMsg, setServerMsg] = useState('');
 
-  // Validaciones con Regex para evitar ambigüedades
+  // Función para validar la mayoría de edad (mínimo 18 años)
+  const esMayorDeEdad = (fechaNac) => {
+    if (!fechaNac) return false;
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNac);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+
+    return edad >= 18;
+  };
+
+  // Validaciones con Regex y reglas de negocio
   const validateField = (name, value) => {
     let errorMsg = '';
 
@@ -40,6 +56,14 @@ export const Auth = ({ onLoginSuccess }) => {
         errorMsg = 'El nombre completo es obligatorio.';
       } else if (value.trim().length < 3) {
         errorMsg = 'El nombre debe tener al menos 3 caracteres.';
+      }
+    }
+
+    if (name === 'fechaNacimiento' && !isLogin) {
+      if (!value) {
+        errorMsg = 'La fecha de nacimiento es obligatoria.';
+      } else if (!esMayorDeEdad(value)) {
+        errorMsg = 'Debes ser mayor de 18 años para crear una cuenta.';
       }
     }
 
@@ -69,6 +93,7 @@ export const Auth = ({ onLoginSuccess }) => {
     const currentErrors = {};
     if (!isLogin) {
       currentErrors.nombre = validateField('nombre', formData.nombre);
+      currentErrors.fechaNacimiento = validateField('fechaNacimiento', formData.fechaNacimiento);
       currentErrors.confirmPassword = validateField('confirmPassword', formData.confirmPassword);
     }
     currentErrors.email = validateField('email', formData.email);
@@ -98,7 +123,8 @@ export const Auth = ({ onLoginSuccess }) => {
       const result = await authService.register({
         nombre: formData.nombre,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        fechaNacimiento: formData.fechaNacimiento
       });
 
       if (result.ok) {
@@ -132,6 +158,22 @@ export const Auth = ({ onLoginSuccess }) => {
               style={{ width: '100%', padding: '8px', marginTop: '5px' }}
             />
             {errors.nombre && <span style={{ color: 'red', fontSize: '12px' }}>{errors.nombre}</span>}
+          </div>
+        )}
+
+        {!isLogin && (
+          <div style={{ marginBottom: '15px' }}>
+            <label>Fecha de Nacimiento:</label>
+            <input
+              type="date"
+              name="fechaNacimiento"
+              value={formData.fechaNacimiento}
+              onChange={handleChange}
+              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+            />
+            {errors.fechaNacimiento && (
+              <span style={{ color: 'red', fontSize: '12px' }}>{errors.fechaNacimiento}</span>
+            )}
           </div>
         )}
 
@@ -198,10 +240,7 @@ export const Auth = ({ onLoginSuccess }) => {
         </button>
       </p>
     </div>
-    
   );
-  
 };
 
-// Agregar esta línea al final de Auth.jsx
 export default Auth;
