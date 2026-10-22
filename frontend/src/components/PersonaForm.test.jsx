@@ -4,34 +4,27 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import PersonaForm from './PersonaForm';
 
-// describe: Contenedor principal de pruebas para el componente PersonaForm
 describe('PersonaForm Component', () => {
   
-  // it: Verifica que el formulario renderice los campos principales adecuadamente
   it('debería renderizar los campos del formulario correctamente', () => {
-    const mockOnSubmit = vi.fn(); // Crea una función espía simulada para interceptar el envío
-    render(<PersonaForm onSubmit={mockOnSubmit} />); // Renderiza el componente en el DOM virtual de prueba
+    const mockOnSave = vi.fn();
+    render(<PersonaForm onSave={mockOnSave} />);
     
-    // screen.getByLabelText / getByRole: Busca elementos interactivos específicos en la pantalla
-    expect(screen.getByLabelText(/nombre/i)).toBeInTheDocument(); // Valida que exista el campo de entrada "Nombre"
-    expect(screen.getByRole('button', { name: /guardar/i })).toBeInTheDocument(); // Valida la existencia del botón de envío
+    expect(screen.getByPlaceholderText(/nombre/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /crear/i })).toBeInTheDocument();
   });
 
-  // it: Evalúa que el flujo de tipeo y envío invoque la función onSubmit provista por las props
-  it('debería llamar a onSubmit con los datos del formulario al enviar', () => {
-    const mockOnSubmit = vi.fn(); // Inicializa el mock del evento de envío
-    render(<PersonaForm onSubmit={mockOnSubmit} />); // Inserta el componente en el entorno virtual
+  it('debería llamar a onSave con los datos del formulario al enviar', () => {
+    const mockOnSave = vi.fn();
+    render(<PersonaForm onSave={mockOnSave} />);
     
-    const inputNombre = screen.getByLabelText(/nombre/i); // Captura el input del formulario
-    const botonGuardar = screen.getByRole('button', { name: /guardar/i }); // Captura el botón para guardar
+    const inputNombre = screen.getByPlaceholderText(/nombre/i);
+    const botonCrear = screen.getByRole('button', { name: /crear/i });
     
-    // fireEvent.change: Simula la interacción del usuario modificando el valor del input a 'Carlos'
     fireEvent.change(inputNombre, { target: { value: 'Carlos' } });
+    fireEvent.click(botonCrear);
     
-    // fireEvent.click: Ejecuta un evento de click simulado sobre el botón de envío del formulario
-    fireEvent.click(botonGuardar);
-    
-    // expect: Asegura que el callback del componente fue invocado exactamente con el objeto de datos esperado
-    expect(mockOnSubmit).toHaveBeenCalledWith({ nombre: 'Carlos' });
+    // Se pasa id (vacío al crear) y el nombre ingresado
+    expect(mockOnSave).toHaveBeenCalledWith({ id: '', nombre: 'Carlos' });
   });
 });

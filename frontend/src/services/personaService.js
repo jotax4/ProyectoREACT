@@ -1,6 +1,7 @@
+// src/services/personaService.js
 const BASE_URL = "http://localhost:9090/api/v1/entities/personas";
 
-const personaService = {
+export const personaService = {
 
   // GET
   getAll: async () => {
@@ -10,31 +11,42 @@ const personaService = {
 
   // POST
   create: async (persona) => {
-    await fetch(BASE_URL, {
+    const response = await fetch(BASE_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(persona)
     });
+    return response;
   },
 
   // PUT
   update: async (id, persona) => {
-    await fetch(`${BASE_URL}/${id}`, {
+    const response = await fetch(`${BASE_URL}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(persona)
     });
+    return response;
   },
 
   // DELETE
   remove: async (id) => {
-    await fetch(`${BASE_URL}/${id}`, {
+    const response = await fetch(`${BASE_URL}/${id}`, {
       method: "DELETE"
     });
+    return response;
+  },
+
+  // Alias para compatibilidad con pruebas unitarias
+  delete: async (id) => {
+    const response = await fetch(`${BASE_URL}/${id}`, {
+      method: "DELETE"
+    });
+    return response;
   }
 
 };
