@@ -1,50 +1,72 @@
-// frontend/src/services/authService.js
-const API_URL = 'http://localhost:5000/api/auth';
+// src/services/authService.js
+
+// src/services/authService.js
+
+const API_URL = 'http://localhost:8081/api'; // 👈 Cambiado a 8081
 
 export const authService = {
-  // Iniciar Sesión
   login: async (credentials) => {
     try {
-      const res = await fetch(`${API_URL}/login`, {
+      const response = await fetch(`${API_URL}/auth/login`, { // 👈 Endpoint específico de Login
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
       });
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem('userToken', data.token);
-        localStorage.setItem('userData', JSON.stringify(data.user));
+
+      const contentType = response.headers.get('content-type');
+      let data;
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = await response.text();
       }
-      return { ok: res.ok, data };
+
+      if (response.ok) {
+        localStorage.setItem('user', JSON.stringify(data.user || data));
+      }
+
+      return { ok: response.ok, data };
     } catch (error) {
       return { ok: false, data: { error: 'Error de conexión con el servidor' } };
     }
   },
 
-  // Registrar Usuario
   register: async (userData) => {
     try {
-      const res = await fetch(`${API_URL}/register`, {
+      const response = await fetch(`${API_URL}/personas`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
       });
-      const data = await res.json();
-      return { ok: res.ok, data };
+
+      const contentType = response.headers.get('content-type');
+      let data;
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = await response.text();
+      }
+
+      return { ok: response.ok, data };
     } catch (error) {
       return { ok: false, data: { error: 'Error de conexión con el servidor' } };
     }
   },
 
-  // Obtener usuario actual
   getCurrentUser: () => {
-    const user = localStorage.getItem('userData');
-    return user ? JSON.parse(user) : null;
+    try {
+      const user = localStorage.getItem('user');
+      return user ? JSON.parse(user) : null;
+    } catch (error) {
+      return null;
+    }
   },
 
-  // Cerrar sesión
   logout: () => {
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('userData');
+    localStorage.removeItem('user');
   }
 };

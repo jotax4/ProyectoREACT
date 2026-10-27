@@ -6,10 +6,11 @@ export const Auth = ({ onLoginSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     nombre: '',
+    rut: '', // Campo agregado para la validación de unicidad en BD
     email: '',
     password: '',
     confirmPassword: '',
-    fechaNacimiento: '' // Campo agregado para la fecha de nacimiento
+    fechaNacimiento: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -30,16 +31,24 @@ export const Auth = ({ onLoginSuccess }) => {
     return edad >= 18;
   };
 
-  // Validaciones con Regex y reglas de negocio
+  // Validaciones de campos
   const validateField = (name, value) => {
     let errorMsg = '';
+
+    if (name === 'rut' && !isLogin) {
+      if (!value.trim()) {
+        errorMsg = 'El RUT es obligatorio.';
+      } else if (value.trim().length < 8) {
+        errorMsg = 'Ingrese un RUT válido (ejemplo: 12345678-9).';
+      }
+    }
 
     if (name === 'email') {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!value.trim()) {
         errorMsg = 'El correo electrónico es obligatorio.';
       } else if (!emailRegex.test(value)) {
-        errorMsg = 'Ingrese un correo electrónico válido (ejemplo: usuario@dominio.com).';
+        errorMsg = 'Ingrese un correo electrónico válido.';
       }
     }
 
@@ -80,7 +89,6 @@ export const Auth = ({ onLoginSuccess }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    // Validar en tiempo real al escribir
     const error = validateField(name, value);
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
@@ -89,10 +97,10 @@ export const Auth = ({ onLoginSuccess }) => {
     e.preventDefault();
     setServerMsg('');
 
-    // Validar todo el formulario antes de enviar
     const currentErrors = {};
     if (!isLogin) {
       currentErrors.nombre = validateField('nombre', formData.nombre);
+      currentErrors.rut = validateField('rut', formData.rut);
       currentErrors.fechaNacimiento = validateField('fechaNacimiento', formData.fechaNacimiento);
       currentErrors.confirmPassword = validateField('confirmPassword', formData.confirmPassword);
     }
@@ -101,7 +109,6 @@ export const Auth = ({ onLoginSuccess }) => {
 
     setErrors(currentErrors);
 
-    // Verificar si existen errores de validación
     const hasErrors = Object.values(currentErrors).some((err) => err !== '');
     if (hasErrors) return;
 
@@ -116,12 +123,13 @@ export const Auth = ({ onLoginSuccess }) => {
         setServerMsg('¡Inicio de sesión exitoso!');
         if (onLoginSuccess) onLoginSuccess(result.data.user);
       } else {
-        setServerMsg(result.data.error || 'Credenciales inválidas.');
+        setServerMsg(typeof result.data === 'string' ? result.data : (result.data.error || 'Credenciales inválidas.'));
       }
     } else {
       // Proceso de Registro
       const result = await authService.register({
         nombre: formData.nombre,
+        rut: formData.rut,
         email: formData.email,
         password: formData.password,
         fechaNacimiento: formData.fechaNacimiento
@@ -131,7 +139,8 @@ export const Auth = ({ onLoginSuccess }) => {
         setServerMsg('¡Cuenta creada con éxito! Ahora puedes iniciar sesión.');
         setIsLogin(true);
       } else {
-        setServerMsg(result.data.error || 'Error al registrar usuario.');
+        // Muestra los mensajes de error retornados por el backend (ej: "El RUT ya se encuentra registrado")
+        setServerMsg(typeof result.data === 'string' ? result.data : (result.data.error || 'Error al registrar usuario.'));
       }
     }
   };
@@ -141,7 +150,7 @@ export const Auth = ({ onLoginSuccess }) => {
       <h2>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</h2>
 
       {serverMsg && (
-        <div style={{ padding: '10px', marginBottom: '15px', backgroundColor: '#e2e3e5', borderRadius: '4px' }}>
+        <div style={{ padding: '10px', marginBottom: '15px', backgroundColor: '#e2e3e5', color: '#333', borderRadius: '4px' }}>
           {serverMsg}
         </div>
       )}
@@ -158,6 +167,21 @@ export const Auth = ({ onLoginSuccess }) => {
               style={{ width: '100%', padding: '8px', marginTop: '5px' }}
             />
             {errors.nombre && <span style={{ color: 'red', fontSize: '12px' }}>{errors.nombre}</span>}
+          </div>
+        )}
+
+        {!isLogin && (
+          <div style={{ marginBottom: '15px' }}>
+            <label>RUT:</label>
+            <input
+              type="text"
+              name="rut"
+              placeholder="12345678-9"
+              value={formData.rut}
+              onChange={handleChange}
+              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+            />
+            {errors.rut && <span style={{ color: 'red', fontSize: '12px' }}>{errors.rut}</span>}
           </div>
         )}
 

@@ -36,6 +36,25 @@ export function App() {
     setCart(cartService.getCart());
   };
 
+  // 🟢 Nueva función para actualizar la cantidad desde los botones + y -
+  const handleUpdateQuantity = (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+
+    // Si tu cartService tiene un método updateQuantity, lo usa; de lo contrario actualiza el estado directamente.
+    if (typeof cartService.updateQuantity === 'function') {
+      cartService.updateQuantity(productId, newQuantity);
+      setCart(cartService.getCart());
+    } else {
+      const updatedCart = cart.map((item) =>
+        item.id === productId ? { ...item, cantidad: newQuantity } : item
+      );
+      setCart(updatedCart);
+      if (typeof cartService.saveCart === 'function') {
+        cartService.saveCart(updatedCart);
+      }
+    }
+  };
+
   const handleCompleteOrder = async (orderData) => {
     const createdOrder = await orderService.createOrder(orderData);
     setLastOrder(createdOrder || orderData);
@@ -81,6 +100,7 @@ export function App() {
           <Cart 
             cartItems={cart} 
             onRemoveFromCart={handleRemoveFromCart}
+            onUpdateQuantity={handleUpdateQuantity} // 👈 Se pasa la prop requerida por Cart.jsx
             onProceedToCheckout={() => setCurrentView('checkout')}
             onGoHome={() => setCurrentView('home')}
           />

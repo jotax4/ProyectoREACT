@@ -1,6 +1,12 @@
 import React from 'react';
 
-export const Cart = ({ cartItems, onRemoveFromCart, onProceedToCheckout, onGoHome }) => {
+export const Cart = ({ 
+  cartItems, 
+  onRemoveFromCart, 
+  onUpdateQuantity, // 🟢 Prop agregada para cambiar la cantidad
+  onProceedToCheckout, 
+  onGoHome 
+}) => {
   const total = cartItems.reduce((acc, item) => {
     const price = item.oferta ? item.precioOferta : item.precio;
     return acc + price * item.cantidad;
@@ -49,7 +55,27 @@ export const Cart = ({ cartItems, onRemoveFromCart, onProceedToCheckout, onGoHom
                     </div>
                   </td>
                   <td>${unitPrice.toLocaleString('es-CL')}</td>
-                  <td>{item.cantidad}</td>
+                  
+                  {/* 🟢 Columna Cantidad con botones + y - */}
+                  <td>
+                    <div className="d-flex align-items-center gap-2">
+                      <button
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => onUpdateQuantity(item.id, item.cantidad - 1)}
+                        disabled={item.cantidad <= 1}
+                      >
+                        -
+                      </button>
+                      <span className="fw-bold px-2">{item.cantidad}</span>
+                      <button
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => onUpdateQuantity(item.id, item.cantidad + 1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </td>
+
                   <td>${(unitPrice * item.cantidad).toLocaleString('es-CL')}</td>
                   <td>
                     <button

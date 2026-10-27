@@ -1,5 +1,5 @@
 // frontend/src/services/orderService.js
-const API_URL = 'http://localhost:5000/api/orders';
+const API_URL = 'http://localhost:8081/api/orders';
 
 export const orderService = {
   createOrder: async (orderData) => {
