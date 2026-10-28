@@ -16,7 +16,7 @@ export default defineConfig({
     react() // Habilita el soporte oficial de React (JSX, Fast Refresh) durante el desarrollo y compilación
   ],
   test: {
-    globals: true, // Permite usar métodos de testing (describe, it, expect, vi) globalmente sin importarlos en cada archivo
+    globals: true, // Permite usaar métodos de testing (describe, it, expect, vi) globalmente sin importarlos en cada archivo
     environment: 'jsdom', // Configura el entorno simulado de navegador (DOM de Node.js) indispensable para Testing Library
     setupFiles: './src/setupTests.js',  // Define la ruta del archivo que inicializa y extiende configuraciones globales de testing
     coverage: {
