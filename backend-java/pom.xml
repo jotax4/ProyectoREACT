@@ -41,7 +41,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Validación de datos (Jakarta Validation) -->
+        <!-- Validación de datos (Jakarta Validationm) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
