@@ -76,15 +76,17 @@ export const Checkout = ({ cartItems, onCompleteOrder, onFailOrder, onBackToCart
   };
 
   return (
-    <div className="row justify-content-center">
+    <div className="row justify-content-center text-white mt-4 mb-5">
       <div className="col-md-8">
         <h2 className="mb-4">Finalizar Compra</h2>
-        <form className="card p-4 shadow-sm" noValidate>
-          <h5 className="mb-3">1. Datos del Cliente</h5>
+        
+        {/* Tarjeta del formulario con bg-dark y border-secondary */}
+        <form className="card bg-dark text-white border-secondary p-4 shadow-lg" noValidate>
+          <h5 className="mb-3 text-light">1. Datos del Cliente</h5>
           
           {/* Campo Nombre */}
           <div className="mb-3">
-            <label className="form-label">Nombre Completo</label>
+            <label className="form-label text-light">Nombre Completo</label>
             <input
               type="text"
               className={`form-control ${errors.nombre ? 'is-invalid' : ''}`}
@@ -97,7 +99,7 @@ export const Checkout = ({ cartItems, onCompleteOrder, onFailOrder, onBackToCart
 
           {/* Campo Email */}
           <div className="mb-3">
-            <label className="form-label">Correo Electrónico</label>
+            <label className="form-label text-light">Correo Electrónico</label>
             <input
               type="email"
               className={`form-control ${errors.email ? 'is-invalid' : ''}`}
@@ -110,7 +112,7 @@ export const Checkout = ({ cartItems, onCompleteOrder, onFailOrder, onBackToCart
 
           {/* Campo Teléfono */}
           <div className="mb-3">
-            <label className="form-label">Teléfono de Contacto</label>
+            <label className="form-label text-light">Teléfono de Contacto</label>
             <input
               type="tel"
               className={`form-control ${errors.telefono ? 'is-invalid' : ''}`}
@@ -123,7 +125,7 @@ export const Checkout = ({ cartItems, onCompleteOrder, onFailOrder, onBackToCart
 
           {/* Campo Dirección */}
           <div className="mb-3">
-            <label className="form-label">Dirección de Envío</label>
+            <label className="form-label text-light">Dirección de Envío</label>
             <input
               type="text"
               className={`form-control ${errors.direccion ? 'is-invalid' : ''}`}
@@ -134,7 +136,7 @@ export const Checkout = ({ cartItems, onCompleteOrder, onFailOrder, onBackToCart
             {errors.direccion && <div className="invalid-feedback">{errors.direccion}</div>}
           </div>
 
-          <h5 className="mb-3 mt-3">2. Opciones de Entrega</h5>
+          <h5 className="mb-3 mt-4 text-light">2. Opciones de Entrega</h5>
           <div className="form-check mb-2">
             <input
               className="form-check-input"
@@ -145,7 +147,7 @@ export const Checkout = ({ cartItems, onCompleteOrder, onFailOrder, onBackToCart
               checked={formData.metodoEnvio === 'estandar'}
               onChange={(e) => setFormData({ ...formData, metodoEnvio: e.target.value })}
             />
-            <label className="form-check-label d-flex justify-content-between" htmlFor="envioEstandar">
+            <label className="form-check-label d-flex justify-content-between text-light" htmlFor="envioEstandar">
               <span>Envío Estándar (3 a 5 días hábiles)</span>
               <strong>$2.990</strong>
             </label>
@@ -160,29 +162,29 @@ export const Checkout = ({ cartItems, onCompleteOrder, onFailOrder, onBackToCart
               checked={formData.metodoEnvio === 'expres'}
               onChange={(e) => setFormData({ ...formData, metodoEnvio: e.target.value })}
             />
-            <label className="form-check-label d-flex justify-content-between" htmlFor="envioExpres">
+            <label className="form-check-label d-flex justify-content-between text-light" htmlFor="envioExpres">
               <span>Envío Exprés (24 a 48 horas)</span>
               <strong>$5.990</strong>
             </label>
           </div>
 
-          <div className="border-top pt-3 mb-4">
-            <div className="d-flex justify-content-between">
+          <div className="border-top border-secondary pt-3 mb-4">
+            <div className="d-flex justify-content-between text-light">
               <span>Subtotal:</span>
               <span>${subtotal.toLocaleString('es-CL')}</span>
             </div>
-            <div className="d-flex justify-content-between">
+            <div className="d-flex justify-content-between text-light">
               <span>Envío:</span>
               <span>${costoEnvio.toLocaleString('es-CL')}</span>
             </div>
-            <div className="d-flex justify-content-between fs-4 fw-bold mt-2">
+            <div className="d-flex justify-content-between fs-4 fw-bold mt-3">
               <span>Total a Pagar:</span>
               <span className="text-success">${total.toLocaleString('es-CL')}</span>
             </div>
           </div>
 
           <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <button type="button" className="btn btn-outline-secondary" onClick={onBackToCart}>
+            <button type="button" className="btn btn-outline-light" onClick={onBackToCart}>
               Volver al Carrito
             </button>
             <div className="d-flex gap-2">
@@ -195,7 +197,7 @@ export const Checkout = ({ cartItems, onCompleteOrder, onFailOrder, onBackToCart
               </button>
               <button 
                 type="button" 
-                className="btn btn-success" 
+                className="btn btn-success fw-bold" 
                 onClick={(e) => handleSubmit(e, true)}
               >
                 Pagar ${total.toLocaleString('es-CL')}
