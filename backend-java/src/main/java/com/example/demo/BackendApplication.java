@@ -15,7 +15,7 @@ public class BackendApplication {
     @EventListener(ApplicationReadyEvent.class)
     public void printRunningMessage() {
         System.out.println("\n----------------------------------------------------------");
-        System.out.println("🚀 ¡EL BACKEND ESTÁ CORRIENDO CORRECTAMENTE!");
+        System.out.println(" ¡EL BACKEND ESTÁ CORRIENDO CORRECTAMENTE!");
         System.out.println("URL Local: http://localhost:8081");
         System.out.println("----------------------------------------------------------\n");
     }

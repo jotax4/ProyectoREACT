@@ -6,7 +6,7 @@ export const Auth = ({ onLoginSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     nombre: '',
-    rut: '', // Campo agregado para la validación de unicidad en BD
+    rut: '', 
     email: '',
     password: '',
     confirmPassword: '',
@@ -139,130 +139,129 @@ export const Auth = ({ onLoginSuccess }) => {
         setServerMsg('¡Cuenta creada con éxito! Ahora puedes iniciar sesión.');
         setIsLogin(true);
       } else {
-        // Muestra los mensajes de error retornados por el backend (ej: "El RUT ya se encuentra registrado")
         setServerMsg(typeof result.data === 'string' ? result.data : (result.data.error || 'Error al registrar usuario.'));
       }
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '40px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <h2>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</h2>
+    <div className="d-flex justify-content-center mt-5 mb-5">
+      <div className="card bg-dark border-secondary p-4 shadow-lg" style={{ width: '100%', maxWidth: '450px' }}>
+        <h2 className="text-white mb-4 text-center">{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</h2>
 
-      {serverMsg && (
-        <div style={{ padding: '10px', marginBottom: '15px', backgroundColor: '#e2e3e5', color: '#333', borderRadius: '4px' }}>
-          {serverMsg}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} noValidate>
-        {!isLogin && (
-          <div style={{ marginBottom: '15px' }}>
-            <label>Nombre Completo:</label>
-            <input
-              type="text"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-            />
-            {errors.nombre && <span style={{ color: 'red', fontSize: '12px' }}>{errors.nombre}</span>}
+        {serverMsg && (
+          <div className="alert alert-info text-center py-2" role="alert">
+            {serverMsg}
           </div>
         )}
 
-        {!isLogin && (
-          <div style={{ marginBottom: '15px' }}>
-            <label>RUT:</label>
+        <form onSubmit={handleSubmit} noValidate>
+          {!isLogin && (
+            <div className="mb-3">
+              <label className="form-label text-light">Nombre Completo:</label>
+              <input
+                type="text"
+                name="nombre"
+                className="form-control"
+                value={formData.nombre}
+                onChange={handleChange}
+              />
+              {errors.nombre && <span className="text-danger small mt-1 d-block">{errors.nombre}</span>}
+            </div>
+          )}
+
+          {!isLogin && (
+            <div className="mb-3">
+              <label className="form-label text-light">RUT:</label>
+              <input
+                type="text"
+                name="rut"
+                placeholder="12345678-9"
+                className="form-control"
+                value={formData.rut}
+                onChange={handleChange}
+              />
+              {errors.rut && <span className="text-danger small mt-1 d-block">{errors.rut}</span>}
+            </div>
+          )}
+
+          {!isLogin && (
+            <div className="mb-3">
+              <label className="form-label text-light">Fecha de Nacimiento:</label>
+              <input
+                type="date"
+                name="fechaNacimiento"
+                className="form-control"
+                value={formData.fechaNacimiento}
+                onChange={handleChange}
+              />
+              {errors.fechaNacimiento && (
+                <span className="text-danger small mt-1 d-block">{errors.fechaNacimiento}</span>
+              )}
+            </div>
+          )}
+
+          <div className="mb-3">
+            <label className="form-label text-light">Correo Electrónico:</label>
             <input
-              type="text"
-              name="rut"
-              placeholder="12345678-9"
-              value={formData.rut}
+              type="email"
+              name="email"
+              className="form-control"
+              value={formData.email}
               onChange={handleChange}
-              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
             />
-            {errors.rut && <span style={{ color: 'red', fontSize: '12px' }}>{errors.rut}</span>}
+            {errors.email && <span className="text-danger small mt-1 d-block">{errors.email}</span>}
           </div>
-        )}
 
-        {!isLogin && (
-          <div style={{ marginBottom: '15px' }}>
-            <label>Fecha de Nacimiento:</label>
-            <input
-              type="date"
-              name="fechaNacimiento"
-              value={formData.fechaNacimiento}
-              onChange={handleChange}
-              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-            />
-            {errors.fechaNacimiento && (
-              <span style={{ color: 'red', fontSize: '12px' }}>{errors.fechaNacimiento}</span>
-            )}
-          </div>
-        )}
-
-        <div style={{ marginBottom: '15px' }}>
-          <label>Correo Electrónico:</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-          {errors.email && <span style={{ color: 'red', fontSize: '12px' }}>{errors.email}</span>}
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label>Contraseña:</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-          {errors.password && <span style={{ color: 'red', fontSize: '12px' }}>{errors.password}</span>}
-        </div>
-
-        {!isLogin && (
-          <div style={{ marginBottom: '15px' }}>
-            <label>Confirmar Contraseña:</label>
+          <div className="mb-3">
+            <label className="form-label text-light">Contraseña:</label>
             <input
               type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
+              name="password"
+              className="form-control"
+              value={formData.password}
               onChange={handleChange}
-              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
             />
-            {errors.confirmPassword && (
-              <span style={{ color: 'red', fontSize: '12px' }}>{errors.confirmPassword}</span>
-            )}
+            {errors.password && <span className="text-danger small mt-1 d-block">{errors.password}</span>}
           </div>
-        )}
 
-        <button
-          type="submit"
-          style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          {isLogin ? 'Ingresar' : 'Registrarse'}
-        </button>
-      </form>
+          {!isLogin && (
+            <div className="mb-4">
+              <label className="form-label text-light">Confirmar Contraseña:</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                className="form-control"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+              />
+              {errors.confirmPassword && (
+                <span className="text-danger small mt-1 d-block">{errors.confirmPassword}</span>
+              )}
+            </div>
+          )}
 
-      <p style={{ marginTop: '15px', textAlign: 'center' }}>
-        {isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}{' '}
-        <button
-          type="button"
-          onClick={() => {
-            setIsLogin(!isLogin);
-            setErrors({});
-            setServerMsg('');
-          }}
-          style={{ background: 'none', border: 'none', color: '#007bff', textDecoration: 'underline', cursor: 'pointer' }}
-        >
-          {isLogin ? 'Crea una aquí' : 'Inicia sesión'}
-        </button>
-      </p>
+          <button type="submit" className="btn btn-primary w-100 py-2 mt-2 fw-bold">
+            {isLogin ? 'Ingresar' : 'Registrarse'}
+          </button>
+        </form>
+
+        <p className="mt-4 text-center text-muted">
+          {isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}{' '}
+          <button
+            type="button"
+            className="btn btn-link p-0 border-0 text-decoration-none fw-bold"
+            style={{ color: '#c084fc' }}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setErrors({});
+              setServerMsg('');
+            }}
+          >
+            {isLogin ? 'Crea una aquí' : 'Inicia sesión'}
+          </button>
+        </p>
+      </div>
     </div>
   );
 };

@@ -94,14 +94,15 @@ export const AdminDashboard = () => {
   };
 
   return (
-    <div>
+    <div className="text-white mt-4">
       <h2 className="mb-4">Panel de Administración</h2>
 
-      <div className="card p-4 mb-5 shadow-sm">
-        <h4>Agregar Nuevo Producto</h4>
+      {/* Tarjeta del formulario con bg-dark y border-secondary */}
+      <div className="card bg-dark border-secondary p-4 mb-5 shadow-sm text-white">
+        <h4 className="mb-3">Agregar Nuevo Producto</h4>
         <form onSubmit={handleCreateProduct} className="row g-3 mt-1" noValidate>
           <div className="col-md-6">
-            <label className="form-label">Nombre del Producto</label>
+            <label className="form-label text-light">Nombre del Producto</label>
             <input
               type="text"
               className={`form-control ${errors.nombre ? 'is-invalid' : ''}`}
@@ -112,7 +113,7 @@ export const AdminDashboard = () => {
           </div>
 
           <div className="col-md-3">
-            <label className="form-label">Categoría</label>
+            <label className="form-label text-light">Categoría</label>
             <select
               className="form-select"
               value={newProduct.categoria}
@@ -125,7 +126,7 @@ export const AdminDashboard = () => {
           </div>
 
           <div className="col-md-3">
-            <label className="form-label">Precio Normal ($)</label>
+            <label className="form-label text-light">Precio Normal ($)</label>
             <input
               type="number"
               className={`form-control ${errors.precio ? 'is-invalid' : ''}`}
@@ -144,13 +145,13 @@ export const AdminDashboard = () => {
                 checked={newProduct.oferta}
                 onChange={(e) => setNewProduct({ ...newProduct, oferta: e.target.checked })}
               />
-              <label className="form-check-label" htmlFor="checkOferta">¿En Oferta?</label>
+              <label className="form-check-label text-light" htmlFor="checkOferta">¿En Oferta?</label>
             </div>
           </div>
 
           {newProduct.oferta && (
             <div className="col-md-3">
-              <label className="form-label">Precio Oferta ($)</label>
+              <label className="form-label text-light">Precio Oferta ($)</label>
               <input
                 type="number"
                 className={`form-control ${errors.precioOferta ? 'is-invalid' : ''}`}
@@ -162,7 +163,7 @@ export const AdminDashboard = () => {
           )}
 
           <div className="col-md-12">
-            <label className="form-label">URL Imagen del Producto</label>
+            <label className="form-label text-light">URL Imagen del Producto</label>
             <input
               type="url"
               className={`form-control ${errors.imagen ? 'is-invalid' : ''}`}
@@ -173,17 +174,18 @@ export const AdminDashboard = () => {
             {errors.imagen && <div className="invalid-feedback">{errors.imagen}</div>}
           </div>
 
-          <div className="col-12">
-            <button type="submit" className="btn btn-primary">
+          <div className="col-12 mt-4">
+            <button type="submit" className="btn btn-primary fw-bold px-4">
               Guardar Producto
             </button>
           </div>
         </form>
       </div>
 
-      <h4>Productos Existentes</h4>
-      <div className="table-responsive mb-5">
-        <table className="table table-striped align-middle">
+      <h4 className="mb-3">Productos Existentes</h4>
+      <div className="table-responsive mb-5 rounded border border-secondary">
+        {/* Etiqueta table con table-dark */}
+        <table className="table table-dark table-hover table-striped align-middle mb-0">
           <thead>
             <tr>
               <th>ID</th>
@@ -204,7 +206,7 @@ export const AdminDashboard = () => {
                 <td>{p.oferta ? `$${p.precioOferta.toLocaleString('es-CL')}` : 'No'}</td>
                 <td>
                   <button
-                    className="btn btn-danger btn-sm"
+                    className="btn btn-outline-danger btn-sm"
                     onClick={() => handleDeleteProduct(p.id)}
                   >
                     Eliminar
@@ -216,9 +218,10 @@ export const AdminDashboard = () => {
         </table>
       </div>
 
-      <h4>Historial de Órdenes</h4>
-      <div className="table-responsive">
-        <table className="table table-bordered">
+      <h4 className="mb-3 mt-5">Historial de Órdenes</h4>
+      <div className="table-responsive rounded border border-secondary mb-5">
+        {/* Etiqueta table con table-dark */}
+        <table className="table table-dark table-hover table-bordered mb-0">
           <thead>
             <tr>
               <th>ID Orden</th>

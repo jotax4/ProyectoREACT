@@ -1,3 +1,156 @@
+/* ==========================================
+   RESET GLOBAL & NAVEGACIÓN (Elimina bordes blancos)
+   ========================================== */
+html, body, #root {
+  background-color: #0f172a !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  min-height: 100vh !important;
+  box-sizing: border-box;
+}
+
+/* Forzar que los contenedores de Bootstrap se fundan con el fondo */
+.container, .container-fluid {
+  background-color: transparent !important;
+}
+
+/* Estilo para la barra de navegación (Navbar) */
+nav, .navbar {
+  background-color: #1e293b !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+.navbar-brand, .nav-link {
+  color: #ffffff !important;
+}
+
+/* ==========================================
+   VARIABLES Y TEMA MODO OSCURO GAMER
+   ========================================== */
+:root {
+  --accent: #9333ea;
+  --accent-bg: rgba(147, 51, 234, 0.1);
+  --accent-border: #7e22ce;
+  --border: #3b1c66;
+  --text-h: #ffffff;
+  --social-bg: #2e1065;
+  --shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+}
+
+/* Títulos principales y del catálogo */
+h1, h2, h3, h4, h5, h6, .card-title {
+  color: #ffffff !important;
+}
+
+/* Tarjetas de Productos */
+.card {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #ffffff !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(147, 51, 234, 0.25) !important;
+  border-color: #7e22ce !important;
+}
+
+.card-body {
+  color: #cbd5e1 !important;
+}
+
+/* Botones de Categorías (Filtros) */
+.btn-outline-primary {
+  color: #c084fc !important;
+  border-color: #9333ea !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: #9333ea !important;
+  color: #ffffff !important;
+}
+
+.btn-primary {
+  background-color: #9333ea !important;
+  border-color: #7e22ce !important;
+}
+
+.btn-primary:hover {
+  background-color: #7e22ce !important;
+}
+
+/* Banner morado para la portada de la tienda */
+.hero-purple {
+  background-color: #3b1c66 !important;
+  color: #ffffff !important;
+  border-radius: 12px;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.hero-purple h1,
+.hero-purple h2,
+.hero-purple p {
+  color: #ffffff !important;
+}
+
+/* ==========================================
+   CORRECCIÓN PARA TABLAS Y CONTENEDORES (CARRITO/ADMIN)
+   ========================================== */
+
+/* Forzar que el texto general sea blanco */
+p, span {
+  color: #cbd5e1 !important;
+}
+
+/* Oscurecer cualquier contenedor que use bg-white o bg-light de Bootstrap */
+.bg-white, .bg-light {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border: 1px solid #334155 !important;
+}
+
+/* Adaptar las tablas de Bootstrap al Modo Oscuro */
+.table {
+  --bs-table-bg: transparent !important;
+  color: #ffffff !important;
+  border-color: #334155 !important;
+}
+
+.table th, .table td {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #334155 !important;
+  vertical-align: middle;
+}
+
+/* Botones secundarios (+ / - en el carrito) */
+.btn-outline-secondary, .btn-light {
+  color: #ffffff !important;
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+}
+
+.btn-outline-secondary:hover, .btn-light:hover {
+  background-color: #475569 !important;
+}
+
+/* Botón Eliminar en el carrito */
+.btn-outline-danger {
+  color: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+.btn-outline-danger:hover {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================
+   ESTILOS ORIGINALES DE APP.CSS
+   ========================================== */
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -36,7 +189,7 @@
   .framework,
   .vite {
     position: absolute;
-   }
+  }
 
   .framework {
     z-index: 1;
@@ -181,4 +334,39 @@
     right: 0;
     border-right-color: var(--border);
   }
+}
+
+/* ==========================================
+   CORRECCIÓN PARA FORMULARIOS (LOGIN Y REGISTRO)
+   ========================================== */
+
+/* Asegurar que las etiquetas (labels) de los formularios sean legibles */
+label, .form-label {
+  color: #cbd5e1 !important;
+  font-weight: 500;
+}
+
+/* Estilo oscuro para los inputs y selects */
+.form-control, .form-select {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border: 1px solid #475569 !important;
+}
+
+/* Cambiar el color del texto ("placeholder") dentro de los inputs */
+.form-control::placeholder {
+  color: #64748b !important;
+}
+
+/* Estilo cuando el usuario hace clic en el input (Efecto Gamer) */
+.form-control:focus, .form-select:focus {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #9333ea !important;
+  box-shadow: 0 0 0 0.25rem rgba(147, 51, 234, 0.25) !important;
+}
+
+/* Asegurar que los textos pequeños o links debajo del formulario sean claros */
+.text-muted, form small, form p {
+  color: #94a3b8 !important;
 }

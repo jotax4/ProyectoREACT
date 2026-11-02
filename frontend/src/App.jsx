@@ -36,11 +36,9 @@ export function App() {
     setCart(cartService.getCart());
   };
 
-  // 🟢 Nueva función para actualizar la cantidad desde los botones + y -
   const handleUpdateQuantity = (productId, newQuantity) => {
     if (newQuantity < 1) return;
 
-    // Si tu cartService tiene un método updateQuantity, lo usa; de lo contrario actualiza el estado directamente.
     if (typeof cartService.updateQuantity === 'function') {
       cartService.updateQuantity(productId, newQuantity);
       setCart(cartService.getCart());
@@ -81,7 +79,8 @@ export function App() {
   const cartCount = cart.reduce((acc, item) => acc + item.cantidad, 0);
 
   return (
-    <div>
+    /* Envoltorio global en dark mode para eliminar los bordes y el fondo blanco */
+    <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', width: '100%' }}>
       <Navbar 
         currentView={currentView} 
         setCurrentView={setCurrentView} 
@@ -90,7 +89,8 @@ export function App() {
         onLogout={handleLogout}
       />
 
-      <div className="container pb-5">
+      {/* Cambiado a container-fluid px-3 px-md-5 para cubrir toda la pantalla sin bordes laterales blancos */}
+      <div className="container-fluid px-3 px-md-5 pb-5">
         {currentView === 'home' && <Home onAddToCart={handleAddToCart} />}
         {currentView === 'categorias' && <Categorias onAddToCart={handleAddToCart} />}
         {currentView === 'ofertas' && <Ofertas onAddToCart={handleAddToCart} />}
@@ -100,7 +100,7 @@ export function App() {
           <Cart 
             cartItems={cart} 
             onRemoveFromCart={handleRemoveFromCart}
-            onUpdateQuantity={handleUpdateQuantity} // 👈 Se pasa la prop requerida por Cart.jsx
+            onUpdateQuantity={handleUpdateQuantity}
             onProceedToCheckout={() => setCurrentView('checkout')}
             onGoHome={() => setCurrentView('home')}
           />
