@@ -8,10 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -26,7 +23,7 @@ public class PersonaController {
         return personaRepository.findAll();
     }
 
-    // 🟢 Registro con ruta única
+    // 🟢 Registro genérico (CRUD)
     @PostMapping("/personas")
     public ResponseEntity<?> crearPersona(@Valid @RequestBody Persona persona) {
 
@@ -59,39 +56,5 @@ public class PersonaController {
 
         Persona nuevaPersona = personaRepository.save(persona);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaPersona);
-    }
-
-    // 🟢 Login con ruta única
-    @PostMapping("/auth/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String password = credentials.get("password");
-
-        if (email == null || email.isBlank() || password == null || password.isBlank()) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Debe ingresar correo y contraseña.");
-        }
-
-        String cleanEmail = email.trim().toLowerCase();
-        String cleanPassword = password.trim();
-
-        Optional<Persona> personaOpt = personaRepository.findByEmail(cleanEmail);
-
-        if (personaOpt.isPresent()) {
-            Persona persona = personaOpt.get();
-            String dbPassword = persona.getPassword() != null ? persona.getPassword().trim() : "";
-
-            if (cleanPassword.equals(dbPassword)) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("message", "Inicio de sesión exitoso");
-                response.put("user", persona);
-                return ResponseEntity.ok(response);
-            }
-        }
-
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body("Credenciales inválidas. Correo o contraseña incorrectos.");
     }
 }
