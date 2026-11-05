@@ -1,13 +1,11 @@
 // src/services/authService.js
 
-// src/services/authService.js
-
-const API_URL = 'http://localhost:8081/api'; // 👈 Cambiado a 8081
+const API_URL = 'http://localhost:8081/api'; // 
 
 export const authService = {
   login: async (credentials) => {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, { // 👈 Endpoint específico de Login
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -24,7 +22,17 @@ export const authService = {
       }
 
       if (response.ok) {
-        localStorage.setItem('user', JSON.stringify(data.user || data));
+        // Aseguramos capturar el objeto del usuario sin importar la estructura del backend
+        const usuarioReal = data.user || data; 
+        
+        localStorage.setItem('user', JSON.stringify(usuarioReal));
+        
+        // Forzamos a que la propiedad 'user' exista para que Auth.jsx la lea correctamente
+        if (typeof data === 'object') {
+          data.user = usuarioReal;
+        } else {
+          data = { user: usuarioReal, original: data };
+        }
       }
 
       return { ok: response.ok, data };

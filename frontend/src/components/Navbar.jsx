@@ -76,7 +76,7 @@ export const Navbar = ({ currentView, setCurrentView, cartCount, user, onLogout 
             {user ? (
               <div className="d-flex align-items-center gap-2">
                 <span className="text-light small">
-                  👤 Hola, <strong>{user.nombre}</strong>
+                  👤 Hola, <strong>{user.usuario}</strong>
                 </span>
                 <button 
                   className="btn btn-sm btn-outline-danger" 

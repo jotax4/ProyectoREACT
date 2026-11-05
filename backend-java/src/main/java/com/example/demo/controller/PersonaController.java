@@ -23,7 +23,7 @@ public class PersonaController {
         return personaRepository.findAll();
     }
 
-    // 🟢 Registro genérico (CRUD)
+
     @PostMapping("/personas")
     public ResponseEntity<?> crearPersona(@Valid @RequestBody Persona persona) {
 
