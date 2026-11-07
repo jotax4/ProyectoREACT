@@ -15,8 +15,19 @@ public class ProductoController {
     @Autowired
     private ProductoService productoService;
 
+    // Obtiene todos los productos, o filtra por categoría (/api/productos?categoria=Consolas) 
+    // o por ofertas (/api/productos?oferta=true)
     @GetMapping
-    public List<Producto> obtenerTodos() {
+    public List<Producto> obtenerProductos(
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) Boolean oferta) {
+        
+        if (Boolean.TRUE.equals(oferta)) {
+            return productoService.obtenerOfertas();
+        }
+        if (categoria != null && !categoria.trim().isEmpty() && !categoria.equalsIgnoreCase("Todas")) {
+            return productoService.obtenerPorCategoria(categoria);
+        }
         return productoService.listarTodos();
     }
 

@@ -1,20 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-/*
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-})
-*/
-
-
 // https://vitejs.dev
 // defineConfig: Macro de configuración nativa de Vite para habilitar tipados y autocompletado inteligente
 export default defineConfig({
   plugins: [
     react() // Habilita el soporte oficial de React (JSX, Fast Refresh) durante el desarrollo y compilación
   ],
+  resolve: {
+    // Esto obliga a Vite a usar una sola copia de React y React DOM resolviendo el conflicto del "Invalid hook call"
+    dedupe: ['react', 'react-dom']
+  },
   test: {
     globals: true, // Permitee usaar métodos de testing (describe, it, expect, vi) globalmente sin importarlos en cada archivo
     environment: 'jsdom', // Configura el entorno simulado de navegador (DOM de Node.js) indispensable para Testing Library
@@ -26,4 +22,3 @@ export default defineConfig({
     },
   },
 });
-

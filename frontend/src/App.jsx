@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
 import { Cart } from './pages/Cart';
@@ -9,6 +10,7 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { Categorias } from './pages/Categorias';
 import { Ofertas } from './pages/Ofertas';
 import { Auth } from './pages/Auth';
+import { Contact } from './pages/Contact';
 
 // Importación de los servicios desacoplados
 import { cartService } from './services/cartService';
@@ -16,7 +18,6 @@ import { orderService } from './services/orderService';
 import { authService } from './services/authService';
 
 export function App() {
-  const [currentView, setCurrentView] = useState('home');
   const [cart, setCart] = useState([]);
   const [lastOrder, setLastOrder] = useState(null);
   const [user, setUser] = useState(null);
@@ -58,79 +59,55 @@ export function App() {
     setLastOrder(createdOrder || orderData);
     cartService.clearCart();
     setCart([]);
-    setCurrentView('payment-success');
-  };
-
-  const handleFailOrder = () => {
-    setCurrentView('payment-failure');
   };
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
-    setCurrentView('home');
   };
 
   const handleLogout = () => {
     authService.logout();
     setUser(null);
-    setCurrentView('home');
   };
 
   const cartCount = cart.reduce((acc, item) => acc + item.cantidad, 0);
 
   return (
-    /* Envoltorio global en dark mode para eliminar los bordes y el fondo blanco */
     <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', width: '100%' }}>
       <Navbar 
-        currentView={currentView} 
-        setCurrentView={setCurrentView} 
         cartCount={cartCount}
         user={user}
         onLogout={handleLogout}
       />
 
-      {/* Cambiado a container-fluid px-3 px-md-5 para cubrir toda la pantalla sin bordes laterales blancos */}
-      <div className="container-fluid px-3 px-md-5 pb-5">
-        {currentView === 'home' && <Home onAddToCart={handleAddToCart} />}
-        {currentView === 'categorias' && <Categorias onAddToCart={handleAddToCart} />}
-        {currentView === 'ofertas' && <Ofertas onAddToCart={handleAddToCart} />}
-        {currentView === 'login' && <Auth onLoginSuccess={handleLoginSuccess} />}
-        
-        {currentView === 'cart' && (
-          <Cart 
-            cartItems={cart} 
-            onRemoveFromCart={handleRemoveFromCart}
-            onUpdateQuantity={handleUpdateQuantity}
-            onProceedToCheckout={() => setCurrentView('checkout')}
-            onGoHome={() => setCurrentView('home')}
-          />
-        )}
+      <div className="w-100 p-0 m-0">
+        <Routes>
+          <Route path="/" element={<Home onAddToCart={handleAddToCart} />} />
+          <Route path="/categorias" element={<Categorias onAddToCart={handleAddToCart} />} />
+          <Route path="/ofertas" element={<Ofertas onAddToCart={handleAddToCart} />} />
+          <Route path="/contacto" element={<Contact />} />
+          <Route path="/login" element={<Auth onLoginSuccess={handleLoginSuccess} />} />
+          
+          <Route path="/cart" element={
+            <Cart 
+              cartItems={cart} 
+              onRemoveFromCart={handleRemoveFromCart}
+              onUpdateQuantity={handleUpdateQuantity}
+            />
+          } />
 
-        {currentView === 'checkout' && (
-          <Checkout 
-            cartItems={cart} 
-            user={user}
-            onCompleteOrder={handleCompleteOrder}
-            onFailOrder={handleFailOrder}
-            onBackToCart={() => setCurrentView('cart')}
-          />
-        )}
+          <Route path="/checkout" element={
+            <Checkout 
+              cartItems={cart} 
+              user={user}
+              onCompleteOrder={handleCompleteOrder}
+            />
+          } />
 
-        {currentView === 'payment-success' && (
-          <PaymentSuccess 
-            order={lastOrder} 
-            onGoHome={() => setCurrentView('home')} 
-          />
-        )}
-
-        {currentView === 'payment-failure' && (
-          <PaymentFailure 
-            onRetry={() => setCurrentView('checkout')} 
-            onGoHome={() => setCurrentView('home')} 
-          />
-        )}
-
-        {currentView === 'admin' && <AdminDashboard />}
+          <Route path="/payment-success" element={<PaymentSuccess order={lastOrder} />} />
+          <Route path="/payment-failure" element={<PaymentFailure />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Routes>
       </div>
     </div>
   );

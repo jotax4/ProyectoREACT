@@ -17,6 +17,14 @@ public class ProductoService {
         return productoRepository.findAll();
     }
 
+    public List<Producto> obtenerPorCategoria(String categoria) {
+        return productoRepository.findByCategoriaIgnoreCase(categoria);
+    }
+
+    public List<Producto> obtenerOfertas() {
+        return productoRepository.findByOfertaTrue();
+    }
+
     public Producto guardarProducto(Producto producto) {
         return productoRepository.save(producto);
     }

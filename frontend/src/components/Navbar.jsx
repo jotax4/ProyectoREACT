@@ -1,17 +1,14 @@
 // frontend/src/components/Navbar.jsx
 import React from 'react';
+import { Link, NavLink } from 'react-router-dom';
 
-export const Navbar = ({ currentView, setCurrentView, cartCount, user, onLogout }) => {
+export const Navbar = ({ cartCount, user, onLogout }) => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
       <div className="container">
-        <a 
-          className="navbar-brand fw-bold" 
-          href="#home" 
-          onClick={(e) => { e.preventDefault(); setCurrentView('home'); }}
-        >
+        <Link className="navbar-brand fw-bold" to="/">
           🎮 Mi Tienda Gamer
-        </a>
+        </Link>
 
         <button 
           className="navbar-toggler" 
@@ -25,44 +22,53 @@ export const Navbar = ({ currentView, setCurrentView, cartCount, user, onLogout 
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <button 
-                className={`nav-link btn btn-link ${currentView === 'home' ? 'active fw-bold' : ''}`}
-                onClick={() => setCurrentView('home')}
+              <NavLink 
+                className={({ isActive }) => `nav-link btn btn-link ${isActive ? 'active fw-bold' : ''}`}
+                to="/"
+                end
               >
                 Inicio
-              </button>
+              </NavLink>
             </li>
             <li className="nav-item">
-              <button 
-                className={`nav-link btn btn-link ${currentView === 'categorias' ? 'active fw-bold' : ''}`}
-                onClick={() => setCurrentView('categorias')}
+              <NavLink 
+                className={({ isActive }) => `nav-link btn btn-link ${isActive ? 'active fw-bold' : ''}`}
+                to="/categorias"
               >
                 Categorías
-              </button>
+              </NavLink>
             </li>
             <li className="nav-item">
-              <button 
-                className={`nav-link btn btn-link ${currentView === 'ofertas' ? 'active fw-bold' : ''}`}
-                onClick={() => setCurrentView('ofertas')}
+              <NavLink 
+                className={({ isActive }) => `nav-link btn btn-link ${isActive ? 'active fw-bold' : ''}`}
+                to="/ofertas"
               >
                 Ofertas
-              </button>
+              </NavLink>
             </li>
             <li className="nav-item">
-              <button 
-                className={`nav-link btn btn-link ${currentView === 'admin' ? 'active fw-bold' : ''}`}
-                onClick={() => setCurrentView('admin')}
+              <NavLink 
+                className={({ isActive }) => `nav-link btn btn-link ${isActive ? 'active fw-bold' : ''}`}
+                to="/contacto"
+              >
+                Contacto
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink 
+                className={({ isActive }) => `nav-link btn btn-link ${isActive ? 'active fw-bold' : ''}`}
+                to="/admin"
               >
                 Admin
-              </button>
+              </NavLink>
             </li>
           </ul>
 
           <div className="d-flex align-items-center gap-3">
             {/* Botón Carrito */}
-            <button 
-              className={`btn btn-outline-light position-relative ${currentView === 'cart' ? 'active' : ''}`}
-              onClick={() => setCurrentView('cart')}
+            <NavLink 
+              className={({ isActive }) => `btn btn-outline-light position-relative ${isActive ? 'active' : ''}`}
+              to="/cart"
             >
               🛒 Carrito
               {cartCount > 0 && (
@@ -70,7 +76,7 @@ export const Navbar = ({ currentView, setCurrentView, cartCount, user, onLogout 
                   {cartCount}
                 </span>
               )}
-            </button>
+            </NavLink>
 
             {/* Gestión de Sesión de Usuario */}
             {user ? (
@@ -86,12 +92,12 @@ export const Navbar = ({ currentView, setCurrentView, cartCount, user, onLogout 
                 </button>
               </div>
             ) : (
-              <button 
-                className={`btn btn-primary ${currentView === 'login' ? 'active' : ''}`}
-                onClick={() => setCurrentView('login')}
+              <NavLink 
+                className={({ isActive }) => `btn btn-primary ${isActive ? 'active' : ''}`}
+                to="/login"
               >
                 Iniciar Sesión
-              </button>
+              </NavLink>
             )}
           </div>
         </div>
