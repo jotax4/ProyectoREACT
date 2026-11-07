@@ -53,6 +53,14 @@ export const Navbar = ({ cartCount, user, onLogout }) => {
                 Contacto
               </NavLink>
             </li>
+            <li className="nav-item">
+              <NavLink 
+                className={({ isActive }) => `nav-link btn btn-link ${isActive ? 'active fw-bold' : ''}`}
+                to="/blog"
+              >
+                Blog
+              </NavLink>
+            </li>
 
             {/* Opción Admin visible únicamente con sesión activa */}
             {user && (

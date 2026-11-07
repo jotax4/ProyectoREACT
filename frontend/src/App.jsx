@@ -11,6 +11,7 @@ import { Categorias } from './pages/Categorias';
 import { Ofertas } from './pages/Ofertas';
 import { Auth } from './pages/Auth';
 import { Contact } from './pages/Contact';
+import { Blog } from './pages/Blog';
 
 // Importación de los servicios desacoplados
 import { cartService } from './services/cartService';
@@ -97,6 +98,7 @@ export function App() {
           <Route path="/categorias" element={<Categorias onAddToCart={handleAddToCart} />} />
           <Route path="/ofertas" element={<Ofertas onAddToCart={handleAddToCart} />} />
           <Route path="/contacto" element={<Contact />} />
+          <Route path="/blog" element={<Blog />} />
           <Route path="/login" element={<Auth onLoginSuccess={handleLoginSuccess} />} />
           
           <Route path="/cart" element={
