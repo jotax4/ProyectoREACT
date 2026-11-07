@@ -1,4 +1,3 @@
-// frontend/src/components/Navbar.jsx
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
@@ -54,14 +53,18 @@ export const Navbar = ({ cartCount, user, onLogout }) => {
                 Contacto
               </NavLink>
             </li>
-            <li className="nav-item">
-              <NavLink 
-                className={({ isActive }) => `nav-link btn btn-link ${isActive ? 'active fw-bold' : ''}`}
-                to="/admin"
-              >
-                Admin
-              </NavLink>
-            </li>
+
+            {/* Opción Admin visible únicamente con sesión activa */}
+            {user && (
+              <li className="nav-item">
+                <NavLink 
+                  className={({ isActive }) => `nav-link btn btn-link ${isActive ? 'active fw-bold' : ''}`}
+                  to="/admin"
+                >
+                  Admin
+                </NavLink>
+              </li>
+            )}
           </ul>
 
           <div className="d-flex align-items-center gap-3">
@@ -82,7 +85,7 @@ export const Navbar = ({ cartCount, user, onLogout }) => {
             {user ? (
               <div className="d-flex align-items-center gap-2">
                 <span className="text-light small">
-                  👤 Hola, <strong>{user.usuario}</strong>
+                  👤 Hola, <strong>{user.usuario || user.nombre}</strong>
                 </span>
                 <button 
                   className="btn btn-sm btn-outline-danger" 

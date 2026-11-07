@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
 import { Cart } from './pages/Cart';
-import { Checkout } from './pages/Checkout';
+import Checkout from './pages/Checkout';
 import { PaymentSuccess } from './pages/PaymentSuccess';
 import { PaymentFailure } from './pages/PaymentFailure';
-import { AdminDashboard } from './pages/AdminDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import { Categorias } from './pages/Categorias';
 import { Ofertas } from './pages/Ofertas';
 import { Auth } from './pages/Auth';
@@ -16,6 +16,17 @@ import { Contact } from './pages/Contact';
 import { cartService } from './services/cartService';
 import { orderService } from './services/orderService';
 import { authService } from './services/authService';
+
+// Componente para proteger rutas privadas
+function ProtectedRoute({ user, children }) {
+  const currentUser = user || authService.getCurrentUser();
+
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
 
 export function App() {
   const [cart, setCart] = useState([]);
@@ -106,7 +117,16 @@ export function App() {
 
           <Route path="/payment-success" element={<PaymentSuccess order={lastOrder} />} />
           <Route path="/payment-failure" element={<PaymentFailure />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+
+          {/* Ruta de Administración Protegida */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute user={user}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </div>
     </div>

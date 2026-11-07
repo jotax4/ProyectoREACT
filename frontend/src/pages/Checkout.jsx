@@ -1,211 +1,153 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export const Checkout = ({ cartItems, onCompleteOrder, onFailOrder, onBackToCart }) => {
-  const [formData, setFormData] = useState({ 
-    nombre: '', 
-    email: '', 
-    telefono: '',
+export default function Checkout({ cartItems = [], user, onCompleteOrder }) {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    nombre: user?.nombre || '',
+    email: user?.email || '',
     direccion: '',
-    metodoEnvio: 'estandar'
+    telefono: '',
+    envio: 'Despacho a domicilio'
   });
 
-  const [errors, setErrors] = useState({});
-
-  const subtotal = cartItems.reduce((acc, item) => {
-    const price = item.oferta ? item.precioOferta : item.precio;
-    return acc + price * item.cantidad;
-  }, 0);
-
-  const costoEnvio = formData.metodoEnvio === 'expres' ? 5990 : 2990;
-  const total = subtotal + costoEnvio;
-
-  // Función de validación de campos
-  const validateForm = () => {
-    const newErrors = {};
-
-    // 1. Validar nombre (no vacío y al menos 3 caracteres)
-    if (!formData.nombre.trim() || formData.nombre.trim().length < 3) {
-      newErrors.nombre = 'Ingresa tu nombre completo (mínimo 3 caracteres).';
+  // Sincroniza datos si el usuario carga de forma asíncrona
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        nombre: prev.nombre || user.nombre || '',
+        email: prev.email || user.email || ''
+      }));
     }
+  }, [user]);
 
-    // 2. Validar email con expresión regular
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email.trim() || !emailRegex.test(formData.email.trim())) {
-      newErrors.email = 'Ingresa un correo electrónico válido (ej. usuario@dominio.com).';
-    }
+  // Total acumulado seguro
+  const totalCompra = cartItems.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
-    // 3. Validar teléfono (número chileno de 9 dígitos)
-    const phoneRegex = /^[0-9]{9}$/;
-    if (!phoneRegex.test(formData.telefono.trim())) {
-      newErrors.telefono = 'Ingresa un número válido de 9 dígitos (ej. 912345678).';
-    }
-
-    // 4. Validar dirección (no vacía y mínima longitud)
-    if (!formData.direccion.trim() || formData.direccion.trim().length < 5) {
-      newErrors.direccion = 'Ingresa una dirección completa (calle, número, comuna).';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
-  const handleSubmit = (e, simularExito = true) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Si la validación falla, cancelamos el envío
-    if (!validateForm()) {
+
+    if (cartItems.length === 0) {
+      alert('El carrito está vacío.');
       return;
     }
 
-    if (simularExito) {
-      onCompleteOrder({ 
-        cliente: {
-          ...formData,
-          nombre: formData.nombre.trim(),
-          email: formData.email.trim(),
-          direccion: formData.direccion.trim()
-        }, 
-        total, 
-        envio: formData.metodoEnvio,
-        costoEnvio,
-        productos: cartItems 
-      });
-    } else {
-      onFailOrder();
+    // Estrcutura ajustada a las propiedades que lee PedidoService.java
+    const orderData = {
+      nombre: formData.nombre,
+      email: formData.email,
+      direccion: formData.direccion,
+      telefono: formData.telefono,
+      cliente: {
+        nombre: formData.nombre,
+        email: formData.email,
+        direccion: formData.direccion,
+        telefono: formData.telefono
+      },
+      envio: formData.envio,
+      total: totalCompra,
+      // 'detalles' mapea directamente con pedido.getDetalles() en Java
+      detalles: cartItems.map(item => ({
+        id: item.id || item.id_producto,
+        cantidad: item.cantidad,
+        precioUnitario: item.precio, // Coincide con detalle.getPrecioUnitario()
+        subtotal: item.precio * item.cantidad
+      }))
+    };
+
+    try {
+      await onCompleteOrder(orderData);
+      alert('¡Compra procesada con éxito!');
+      navigate('/payment-success');
+    } catch (error) {
+      console.error('Error al procesar el pedido:', error);
+      alert('Ocurrió un error al procesar la compra.');
     }
   };
 
   return (
-    <div className="row justify-content-center text-white mt-4 mb-5">
-      <div className="col-md-8">
-        <h2 className="mb-4">Finalizar Compra</h2>
-        
-        {/* Tarjeta del formulario con bg-dark y border-secondary */}
-        <form className="card bg-dark text-white border-secondary p-4 shadow-lg" noValidate>
-          <h5 className="mb-3 text-light">1. Datos del Cliente</h5>
-          
-          {/* Campo Nombre */}
-          <div className="mb-3">
-            <label className="form-label text-light">Nombre Completo</label>
-            <input
-              type="text"
-              className={`form-control ${errors.nombre ? 'is-invalid' : ''}`}
-              placeholder="Ej: Juan Pérez"
-              value={formData.nombre}
-              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-            />
-            {errors.nombre && <div className="invalid-feedback">{errors.nombre}</div>}
-          </div>
+    <div className="container py-5 text-white" style={{ maxWidth: '600px' }}>
+      <h2 className="mb-4 fw-bold">Finalizar Compra</h2>
 
-          {/* Campo Email */}
-          <div className="mb-3">
-            <label className="form-label text-light">Correo Electrónico</label>
-            <input
-              type="email"
-              className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-              placeholder="ejemplo@correo.com"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            />
-            {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-          </div>
+      <form onSubmit={handleSubmit} className="bg-dark p-4 rounded shadow border border-secondary">
+        <div className="mb-3">
+          <label className="form-label">Nombre Completo</label>
+          <input
+            type="text"
+            name="nombre"
+            className="form-control bg-secondary text-white border-0"
+            value={formData.nombre}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-          {/* Campo Teléfono */}
-          <div className="mb-3">
-            <label className="form-label text-light">Teléfono de Contacto</label>
-            <input
-              type="tel"
-              className={`form-control ${errors.telefono ? 'is-invalid' : ''}`}
-              placeholder="912345678"
-              value={formData.telefono}
-              onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-            />
-            {errors.telefono && <div className="invalid-feedback">{errors.telefono}</div>}
-          </div>
+        <div className="mb-3">
+          <label className="form-label">Correo Electrónico</label>
+          <input
+            type="email"
+            name="email"
+            className="form-control bg-secondary text-white border-0"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-          {/* Campo Dirección */}
-          <div className="mb-3">
-            <label className="form-label text-light">Dirección de Envío</label>
-            <input
-              type="text"
-              className={`form-control ${errors.direccion ? 'is-invalid' : ''}`}
-              placeholder="Av. Providencia 1234, Depto 502, Santiago"
-              value={formData.direccion}
-              onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
-            />
-            {errors.direccion && <div className="invalid-feedback">{errors.direccion}</div>}
-          </div>
+        <div className="mb-3">
+          <label className="form-label">Dirección de Entrega</label>
+          <input
+            type="text"
+            name="direccion"
+            className="form-control bg-secondary text-white border-0"
+            value={formData.direccion}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-          <h5 className="mb-3 mt-4 text-light">2. Opciones de Entrega</h5>
-          <div className="form-check mb-2">
-            <input
-              className="form-check-input"
-              type="radio"
-              name="metodoEnvio"
-              id="envioEstandar"
-              value="estandar"
-              checked={formData.metodoEnvio === 'estandar'}
-              onChange={(e) => setFormData({ ...formData, metodoEnvio: e.target.value })}
-            />
-            <label className="form-check-label d-flex justify-content-between text-light" htmlFor="envioEstandar">
-              <span>Envío Estándar (3 a 5 días hábiles)</span>
-              <strong>$2.990</strong>
-            </label>
-          </div>
-          <div className="form-check mb-4">
-            <input
-              className="form-check-input"
-              type="radio"
-              name="metodoEnvio"
-              id="envioExpres"
-              value="expres"
-              checked={formData.metodoEnvio === 'expres'}
-              onChange={(e) => setFormData({ ...formData, metodoEnvio: e.target.value })}
-            />
-            <label className="form-check-label d-flex justify-content-between text-light" htmlFor="envioExpres">
-              <span>Envío Exprés (24 a 48 horas)</span>
-              <strong>$5.990</strong>
-            </label>
-          </div>
+        <div className="mb-3">
+          <label className="form-label">Teléfono</label>
+          <input
+            type="text"
+            name="telefono"
+            className="form-control bg-secondary text-white border-0"
+            value={formData.telefono}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-          <div className="border-top border-secondary pt-3 mb-4">
-            <div className="d-flex justify-content-between text-light">
-              <span>Subtotal:</span>
-              <span>${subtotal.toLocaleString('es-CL')}</span>
-            </div>
-            <div className="d-flex justify-content-between text-light">
-              <span>Envío:</span>
-              <span>${costoEnvio.toLocaleString('es-CL')}</span>
-            </div>
-            <div className="d-flex justify-content-between fs-4 fw-bold mt-3">
-              <span>Total a Pagar:</span>
-              <span className="text-success">${total.toLocaleString('es-CL')}</span>
-            </div>
-          </div>
+        <div className="mb-4">
+          <label className="form-label">Método de Envío</label>
+          <select
+            name="envio"
+            className="form-select bg-secondary text-white border-0"
+            value={formData.envio}
+            onChange={handleChange}
+          >
+            <option value="Despacho a domicilio">Despacho a domicilio</option>
+            <option value="Retiro en tienda">Retiro en tienda</option>
+          </select>
+        </div>
 
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <button type="button" className="btn btn-outline-light" onClick={onBackToCart}>
-              Volver al Carrito
-            </button>
-            <div className="d-flex gap-2">
-              <button 
-                type="button" 
-                className="btn btn-outline-danger" 
-                onClick={(e) => handleSubmit(e, false)}
-              >
-                Simular Error
-              </button>
-              <button 
-                type="button" 
-                className="btn btn-success fw-bold" 
-                onClick={(e) => handleSubmit(e, true)}
-              >
-                Pagar ${total.toLocaleString('es-CL')}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
+        <button 
+          type="submit" 
+          className="btn btn-primary w-100 py-2 fw-bold"
+          disabled={cartItems.length === 0}
+        >
+          Confirmar y Pagar (${totalCompra.toLocaleString('es-CL')})
+        </button>
+      </form>
     </div>
   );
-};
+}
