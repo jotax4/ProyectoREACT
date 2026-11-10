@@ -1,10 +1,11 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.DetalleProducto;
+import com.example.demo.model.EstadoPedido;
 import com.example.demo.model.Pedido;
-import com.example.demo.model.Producto;
 import com.example.demo.service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,59 +13,52 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/pedidos")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class PedidoController {
 
     @Autowired
     private PedidoService pedidoService;
 
+    // GET /api/pedidos - Obtener todos los pedidos
     @GetMapping
-    public List<Pedido> obtenerPedidos() {
-        return pedidoService.listarTodos();
+    public ResponseEntity<List<Pedido>> obtenerTodos() {
+        return ResponseEntity.ok(pedidoService.obtenerTodos());
     }
 
+    // GET /api/pedidos/{id} - Obtener un pedido por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Pedido> obtenerPorId(@PathVariable Long id) {
+        return pedidoService.obtenerPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // POST /api/pedidos - Crear un nuevo pedido
     @PostMapping
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public Pedido crearPedido(@RequestBody Map<String, Object> payload) {
-        Map cliente = (Map) payload.get("cliente");
-        Number totalNum = (Number) payload.get("total");
-        String envio = (String) payload.get("envio");
+    public ResponseEntity<Pedido> crearPedido(@RequestBody Pedido pedido) {
+        Pedido nuevoPedido = pedidoService.crearPedido(pedido);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
+    }
 
-        Pedido nuevoPedido = new Pedido();
-
-        if (cliente != null) {
-            nuevoPedido.setNombreCliente((String) cliente.get("nombre"));
-            nuevoPedido.setEmailCliente((String) cliente.get("email"));
-            nuevoPedido.setDireccion((String) cliente.get("direccion"));
-            nuevoPedido.setTelefono((String) cliente.get("telefono"));
+    // PATCH /api/pedidos/{id}/estado - Actualizar unicamente el estado del pedido
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<?> cambiarEstado(
+            @PathVariable Long id, 
+            @RequestBody Map<String, String> payload
+    ) {
+        String estadoStr = payload.get("estado");
+        if (estadoStr == null || estadoStr.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("El campo 'estado' es obligatorio.");
         }
 
-        nuevoPedido.setMetodoEnvio(envio);
-        nuevoPedido.setTotal(totalNum != null ? totalNum.intValue() : 0);
-
-        List items = (List) payload.get("items");
-        if (items != null) {
-            for (Object obj : items) {
-                Map item = (Map) obj;
-                DetalleProducto detalle = new DetalleProducto();
-
-                Producto producto = new Producto();
-                Number prodId = (Number) item.get("id");
-                if (prodId != null) {
-                    producto.setId(prodId.longValue());
-                }
-                detalle.setProducto(producto);
-
-                Number cantidad = (Number) item.get("cantidad");
-                Number precio = (Number) item.get("precio");
-
-                detalle.setCantidad(cantidad != null ? cantidad.intValue() : 1);
-                detalle.setPrecioUnitario(precio != null ? precio.intValue() : 0);
-
-                nuevoPedido.agregarDetalle(detalle);
-            }
+        try {
+            EstadoPedido nuevoEstado = EstadoPedido.valueOf(estadoStr.toUpperCase());
+            Pedido pedidoActualizado = pedidoService.actualizarEstado(id, nuevoEstado);
+            return ResponseEntity.ok(pedidoActualizado);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Estado no válido. Valores aceptados: PENDIENTE, EN_PREPARACION, ENVIADO, ENTREGADO, CANCELADO");
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
-
-        return pedidoService.crearPedido(nuevoPedido);
     }
 }

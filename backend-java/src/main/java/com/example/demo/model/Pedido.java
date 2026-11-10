@@ -2,8 +2,6 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "pedidos")
@@ -13,55 +11,35 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nombreCliente;
-    private String emailCliente;
-    private String direccion;
-    private String telefono;
-    private String metodoEnvio;
-    private Integer total;
-    private LocalDateTime fechaCompra;
+    private String cliente;
+    private String email;
+    private Double total;
+    private LocalDateTime fecha;
 
-    // Relación maestro-detalle con la lista de productos comprados en esta boleta/pedido
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DetalleProducto> detalles = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false)
+    private EstadoPedido estado = EstadoPedido.PENDIENTE; // Estado por defecto
 
-    @PrePersist
-    protected void onCreate() {
-        fechaCompra = LocalDateTime.now();
+    public Pedido() {
+        this.fecha = LocalDateTime.now();
     }
 
-    // Método helper para asociar ítems al pedido
-    public void agregarDetalle(DetalleProducto detalle) {
-        detalles.add(detalle);
-        detalle.setPedido(this);
-    }
-
-    // --- GETTERS Y SETTERS ---
-
+    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getNombreCliente() { return nombreCliente; }
-    public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
+    public String getCliente() { return cliente; }
+    public void setCliente(String cliente) { this.cliente = cliente; }
 
-    public String getEmailCliente() { return emailCliente; }
-    public void setEmailCliente(String emailCliente) { this.emailCliente = emailCliente; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getDireccion() { return direccion; }
-    public void setDireccion(String direccion) { this.direccion = direccion; }
+    public Double getTotal() { return total; }
+    public void setTotal(Double total) { this.total = total; }
 
-    public String getTelefono() { return telefono; }
-    public void setTelefono(String telefono) { this.telefono = telefono; }
+    public LocalDateTime getFecha() { return fecha; }
+    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 
-    public String getMetodoEnvio() { return metodoEnvio; }
-    public void setMetodoEnvio(String metodoEnvio) { this.metodoEnvio = metodoEnvio; }
-
-    public Integer getTotal() { return total; }
-    public void setTotal(Integer total) { this.total = total; }
-
-    public LocalDateTime getFechaCompra() { return fechaCompra; }
-    public void setFechaCompra(LocalDateTime fechaCompra) { this.fechaCompra = fechaCompra; }
-
-    public List<DetalleProducto> getDetalles() { return detalles; }
-    public void setDetalles(List<DetalleProducto> detalles) { this.detalles = detalles; }
+    public EstadoPedido getEstado() { return estado; }
+    public void setEstado(EstadoPedido estado) { this.estado = estado; }
 }
