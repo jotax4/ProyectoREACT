@@ -1,0 +1,9 @@
+com\example\demo\controller\AuthController.class
+com\example\demo\repository\PersonaRepository.class
+com\example\demo\BackendApplication.class
+com\example\demo\dto\AuthRequest.class
+com\example\demo\config\CorsConfig$1.class
+com\example\demo\config\GlobalExceptionHandler.class
+com\example\demo\entity\Persona.class
+com\example\demo\controller\PersonaController.class
+com\example\demo\config\CorsConfig.class

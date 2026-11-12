@@ -1,0 +1,372 @@
+/* ==========================================
+   RESET GLOBAL & NAVEGACIÓN (Elimina bordes blancos)
+   ========================================== */
+html, body, #root {
+  background-color: #0f172a !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  min-height: 100vh !important;
+  box-sizing: border-box;
+}
+
+/* Forzar que los contenedores de Bootstrap se fundan con el fondo */
+.container, .container-fluid {
+  background-color: transparent !important;
+}
+
+/* Estilo para la barra de navegación (Navbar) */
+nav, .navbar {
+  background-color: #1e293b !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+.navbar-brand, .nav-link {
+  color: #ffffff !important;
+}
+
+/* ==========================================
+   VARIABLES Y TEMA MODO OSCURO GAMER
+   ========================================== */
+:root {
+  --accent: #9333ea;
+  --accent-bg: rgba(147, 51, 234, 0.1);
+  --accent-border: #7e22ce;
+  --border: #3b1c66;
+  --text-h: #ffffff;
+  --social-bg: #2e1065;
+  --shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+}
+
+/* Títulos principales y del catálogo */
+h1, h2, h3, h4, h5, h6, .card-title {
+  color: #ffffff !important;
+}
+
+/* Tarjetas de Productos */
+.card {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #ffffff !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(147, 51, 234, 0.25) !important;
+  border-color: #7e22ce !important;
+}
+
+.card-body {
+  color: #cbd5e1 !important;
+}
+
+/* Botones de Categorías (Filtros) */
+.btn-outline-primary {
+  color: #c084fc !important;
+  border-color: #9333ea !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: #9333ea !important;
+  color: #ffffff !important;
+}
+
+.btn-primary {
+  background-color: #9333ea !important;
+  border-color: #7e22ce !important;
+}
+
+.btn-primary:hover {
+  background-color: #7e22ce !important;
+}
+
+/* Banner morado para la portada de la tienda */
+.hero-purple {
+  background-color: #3b1c66 !important;
+  color: #ffffff !important;
+  border-radius: 12px;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.hero-purple h1,
+.hero-purple h2,
+.hero-purple p {
+  color: #ffffff !important;
+}
+
+/* ==========================================
+   CORRECCIÓN PARA TABLAS Y CONTENEDORES (CARRITO/ADMIN)
+   ========================================== */
+
+/* Forzar que el texto general sea blanco */
+p, span {
+  color: #cbd5e1 !important;
+}
+
+/* Oscurecer cualquier contenedor que use bg-white o bg-light de Bootstrap */
+.bg-white, .bg-light {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border: 1px solid #334155 !important;
+}
+
+/* Adaptar las tablas de Bootstrap al Modo Oscuro */
+.table {
+  --bs-table-bg: transparent !important;
+  color: #ffffff !important;
+  border-color: #334155 !important;
+}
+
+.table th, .table td {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #334155 !important;
+  vertical-align: middle;
+}
+
+/* Botones secundarios (+ / - en el carrito) */
+.btn-outline-secondary, .btn-light {
+  color: #ffffff !important;
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+}
+
+.btn-outline-secondary:hover, .btn-light:hover {
+  background-color: #475569 !important;
+}
+
+/* Botón Eliminar en el carrito */
+.btn-outline-danger {
+  color: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+.btn-outline-danger:hover {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================
+   ESTILOS ORIGINALES DE APP.CSS
+   ========================================== */
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
+/* ==========================================
+   CORRECCIÓN PARA FORMULARIOS (LOGIN Y REGISTRO)
+   ========================================== */
+
+/* Asegurar que las etiquetas (labels) de los formularios sean legibles */
+label, .form-label {
+  color: #cbd5e1 !important;
+  font-weight: 500;
+}
+
+/* Estilo oscuro para los inputs y selects */
+.form-control, .form-select {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border: 1px solid #475569 !important;
+}
+
+/* Cambiar el color del texto ("placeholder") dentro de los inputs */
+.form-control::placeholder {
+  color: #64748b !important;
+}
+
+/* Estilo cuando el usuario hace clic en el input (Efecto Gamer) */
+.form-control:focus, .form-select:focus {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #9333ea !important;
+  box-shadow: 0 0 0 0.25rem rgba(147, 51, 234, 0.25) !important;
+}
+
+/* Asegurar que los textos pequeños o links debajo del formulario sean claros */
+.text-muted, form small, form p {
+  color: #94a3b8 !important;
+}
