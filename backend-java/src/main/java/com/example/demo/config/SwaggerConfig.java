@@ -13,7 +13,7 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
-        final String securitySchemeName = "bearerAuth";
+        final String securitySchemeName = "Bearer Authentication";
         return new OpenAPI()
                 .info(new Info()
                         .title("API E-Commerce - Backend")

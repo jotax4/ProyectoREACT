@@ -18,7 +18,7 @@ public class ProductoService {
     }
 
     public List<Producto> obtenerPorCategoria(String categoria) {
-        return productoRepository.findByCategoriaIgnoreCase(categoria);
+        return productoRepository.findByCategoriaNombreIgnoreCase(categoria);
     }
 
     public List<Producto> obtenerOfertas() {
