@@ -1,10 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export function Cart({ cartItems = [], onRemoveFromCart, onUpdateQuantity }) {
   const navigate = useNavigate();
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
-  const total = cartItems.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+  const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
+
+  const handleConfirmarEliminacion = (id) => {
+    onRemoveFromCart(id);
+    setConfirmDeleteId(null);
+  };
+
+  const handleDisminuir = (item) => {
+    if (item.cantidad <= 1) {
+      setConfirmDeleteId(item.id);
+    } else {
+      onUpdateQuantity(item.id, item.cantidad - 1);
+    }
+  };
 
   return (
     <div className="container py-5 text-white" style={{ maxWidth: '900px' }}>
@@ -12,7 +26,10 @@ export function Cart({ cartItems = [], onRemoveFromCart, onUpdateQuantity }) {
 
       {cartItems.length === 0 ? (
         <div className="alert alert-info text-center">
-          Tu carrito está vacío. <button className="btn btn-link p-0 text-info" onClick={() => navigate('/')}>Ir a la tienda</button>
+          Tu carrito está vacío.{' '}
+          <button className="btn btn-link p-0 text-info" onClick={() => navigate('/')}>
+            Ir a la tienda
+          </button>
         </div>
       ) : (
         <>
@@ -24,13 +41,13 @@ export function Cart({ cartItems = [], onRemoveFromCart, onUpdateQuantity }) {
                   <th>Precio</th>
                   <th className="text-center">Cantidad</th>
                   <th>Subtotal</th>
-                  <th>Acción</th>
+                  <th className="text-center">Acción</th>
                 </tr>
               </thead>
               <tbody>
                 {cartItems.map((item) => {
-                  // Captura la imagen sea cual sea la propiedad recibida
                   const imgSrc = item.imagenUrl || item.imagen || item.image || item.foto;
+                  const estaConfirmando = confirmDeleteId === item.id;
 
                   return (
                     <tr key={item.id}>
@@ -52,27 +69,47 @@ export function Cart({ cartItems = [], onRemoveFromCart, onUpdateQuantity }) {
                         <div className="d-inline-flex align-items-center border border-secondary rounded px-1">
                           <button
                             className="btn btn-sm btn-dark text-white border-0 px-2"
-                            onClick={() => onUpdateQuantity(item.id, item.cantidad - 1)}
+                            onClick={() => handleDisminuir(item)}
                           >
                             -
                           </button>
                           <span className="px-2 fw-bold">{item.cantidad}</span>
                           <button
                             className="btn btn-sm btn-dark text-white border-0 px-2"
-                            onClick={() => onUpdateQuantity(item.id, item.cantidad + 1)}
+                            onClick={() => {
+                              setConfirmDeleteId(null);
+                              onUpdateQuantity(item.id, item.cantidad + 1);
+                            }}
                           >
                             +
                           </button>
                         </div>
                       </td>
                       <td>${(item.precio * item.cantidad).toLocaleString('es-CL')}</td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => onRemoveFromCart(item.id)}
-                        >
-                          Eliminar
-                        </button>
+                      <td className="text-center" style={{ minWidth: '185px' }}>
+                        {estaConfirmando ? (
+                          <div className="d-inline-flex gap-2">
+                            <button
+                              className="btn btn-sm btn-danger fw-semibold"
+                              onClick={() => handleConfirmarEliminacion(item.id)}
+                            >
+                              Confirmar
+                            </button>
+                            <button
+                              className="btn btn-sm btn-secondary"
+                              onClick={() => setConfirmDeleteId(null)}
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => setConfirmDeleteId(item.id)}
+                          >
+                            Eliminar
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );

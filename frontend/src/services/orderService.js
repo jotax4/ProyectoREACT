@@ -1,20 +1,57 @@
-const API_URL = 'http://localhost:8081/api/pedidos'; // Verifica si tu Spring Boot corre en 8080 o 8081
+// src/services/orderService.js
+
+const API_URL = 'http://localhost:8081/api/v1/pedidos';
+
+const getAuthHeaders = () => {
+  const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+  const token =
+    localStorage.getItem('token') ||
+    storedUser?.token ||
+    storedUser?.accessToken ||
+    storedUser?.jwt;
+
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
+
+const parseErrorMessage = async (response) => {
+  const errorText = await response.text();
+  try {
+    const parsed = JSON.parse(errorText);
+    return parsed.error || parsed.message || errorText;
+  } catch {
+    return errorText;
+  }
+};
 
 export const orderService = {
   createOrder: async (orderData) => {
+    const direccionLimpia = orderData.direccion?.trim() || '';
+    const payload = {
+      ...orderData,
+      direccion: direccionLimpia,
+      telefono: orderData.telefono?.trim() || '',
+      metodoEnvio:
+        orderData.metodoEnvio ||
+        orderData.envio ||
+        (direccionLimpia ? 'Despacho a domicilio' : 'Retiro en tienda'),
+    };
+
     try {
-      const res = await fetch(API_URL, {
+      const response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Error ${res.status}: ${errorText}`);
+      if (!response.ok) {
+        const msg = await parseErrorMessage(response);
+        throw new Error(`Error ${response.status}: ${msg}`);
       }
 
-      return await res.json();
+      return await response.json();
     } catch (error) {
       console.error('Error enviando la orden:', error);
       throw error;
@@ -23,12 +60,59 @@ export const orderService = {
 
   getOrders: async () => {
     try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('Error al obtener pedidos');
-      return await res.json();
+      const response = await fetch(API_URL, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const msg = await parseErrorMessage(response);
+        throw new Error(`Error ${response.status}: ${msg}`);
+      }
+
+      return await response.json();
     } catch (error) {
-      console.error('Error obteniendo pedidos:', error);
-      return [];
+      console.error('Error obteniendo las órdenes:', error);
+      throw error;
     }
-  }
+  },
+
+  getOrderById: async (id) => {
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const msg = await parseErrorMessage(response);
+        throw new Error(`Error ${response.status}: ${msg}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`Error obteniendo la orden #${id}:`, error);
+      throw error;
+    }
+  },
+
+  updateOrderStatus: async (id, estado) => {
+    try {
+      const response = await fetch(`${API_URL}/${id}/estado`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ estado }),
+      });
+
+      if (!response.ok) {
+        const msg = await parseErrorMessage(response);
+        throw new Error(`Error ${response.status}: ${msg}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`Error actualizando el estado de la orden #${id}:`, error);
+      throw error;
+    }
+  },
 };

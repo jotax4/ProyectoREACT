@@ -39,10 +39,20 @@ public class PedidoController {
     }
 
     @PostMapping
-    @Operation(summary = "Crear un nuevo pedido", description = "Registra una nueva orden de compra con su detalle de productos (Requiere sesión iniciada)")
-    public ResponseEntity<Pedido> crearPedido(@RequestBody Pedido pedido) {
-        Pedido nuevoPedido = pedidoService.crearPedido(pedido);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
+    @Operation(summary = "Crear un nuevo pedido", description = "Registra una nueva orden de compra con datos de despacho y detalle de productos (Requiere sesión iniciada)")
+    public ResponseEntity<?> crearPedido(@RequestBody Pedido pedido) {
+        try {
+            if (pedido.getMetodoEnvio() == null || pedido.getMetodoEnvio().isBlank()) {
+                boolean tieneDireccion = pedido.getDireccion() != null && !pedido.getDireccion().isBlank();
+                pedido.setMetodoEnvio(tieneDireccion ? "Despacho a domicilio" : "Retiro en tienda");
+            }
+
+            Pedido nuevoPedido = pedidoService.crearPedido(pedido);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage() != null ? e.getMessage() : "Error al procesar el pedido"));
+        }
     }
 
     @PatchMapping("/{id}/estado")

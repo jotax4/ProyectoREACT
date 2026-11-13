@@ -1,6 +1,6 @@
 // src/services/authService.js
 
-const API_URL = 'http://localhost:8081/api'; // 
+const API_URL = 'http://localhost:8081/api/v1';
 
 export const authService = {
   login: async (credentials) => {
@@ -22,12 +22,14 @@ export const authService = {
       }
 
       if (response.ok) {
-        // Aseguramos capturar el objeto del usuario sin importar la estructura del backend
-        const usuarioReal = data.user || data; 
-        
+        const token = data.token || data.accessToken || data.jwt;
+        if (token) {
+          localStorage.setItem('token', token);
+        }
+
+        const usuarioReal = data.user || data;
         localStorage.setItem('user', JSON.stringify(usuarioReal));
-        
-        // Forzamos a que la propiedad 'user' exista para que Auth.jsx la lea correctamente
+
         if (typeof data === 'object') {
           data.user = usuarioReal;
         } else {
@@ -43,7 +45,7 @@ export const authService = {
 
   register: async (userData) => {
     try {
-      const response = await fetch(`${API_URL}/personas`, {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +76,15 @@ export const authService = {
     }
   },
 
+  getToken: () => {
+    const token = localStorage.getItem('token');
+    if (token) return token;
+    const user = authService.getCurrentUser();
+    return user?.token || user?.accessToken || user?.jwt || null;
+  },
+
   logout: () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
   }
 };

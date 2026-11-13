@@ -4,32 +4,36 @@ import { useNavigate } from 'react-router-dom';
 export default function Checkout({ cartItems = [], user, onCompleteOrder }) {
   const navigate = useNavigate();
 
+  const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+  const activeUser = user || storedUser;
+
   const [formData, setFormData] = useState({
-    nombre: user?.nombre || '',
-    email: user?.email || '',
+    nombre: activeUser?.nombre || '',
+    email: activeUser?.email || '',
     direccion: '',
     telefono: '',
-    envio: 'Despacho a domicilio'
+    envio: 'Despacho a domicilio',
   });
 
-  // Sincroniza datos si el usuario carga de forma asíncrona
   useEffect(() => {
-    if (user) {
+    if (activeUser) {
       setFormData((prev) => ({
         ...prev,
-        nombre: prev.nombre || user.nombre || '',
-        email: prev.email || user.email || ''
+        nombre: prev.nombre || activeUser.nombre || '',
+        email: prev.email || activeUser.email || '',
       }));
     }
   }, [user]);
 
-  // Total acumulado seguro
-  const totalCompra = cartItems.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+  const totalCompra = cartItems.reduce(
+    (acc, item) => acc + Number(item.precio) * Number(item.cantidad),
+    0
+  );
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -41,27 +45,25 @@ export default function Checkout({ cartItems = [], user, onCompleteOrder }) {
       return;
     }
 
-    // Estrcutura ajustada a las propiedades que lee PedidoService.java
+    const userId = activeUser?.id;
+
     const orderData = {
-      nombre: formData.nombre,
-      email: formData.email,
-      direccion: formData.direccion,
-      telefono: formData.telefono,
-      cliente: {
-        nombre: formData.nombre,
-        email: formData.email,
-        direccion: formData.direccion,
-        telefono: formData.telefono
-      },
-      envio: formData.envio,
+      ...(userId ? { persona: { id: Number(userId) } } : {}),
+      direccion:
+        formData.envio === 'Retiro en tienda' && !formData.direccion.trim()
+          ? 'Retiro en tienda'
+          : formData.direccion.trim(),
+      telefono: formData.telefono.trim(),
+      metodoEnvio: formData.envio,
       total: totalCompra,
-      // 'detalles' mapea directamente con pedido.getDetalles() en Java
-      detalles: cartItems.map(item => ({
-        id: item.id || item.id_producto,
-        cantidad: item.cantidad,
-        precioUnitario: item.precio, // Coincide con detalle.getPrecioUnitario()
-        subtotal: item.precio * item.cantidad
-      }))
+      detalles: cartItems.map((item) => ({
+        producto: {
+          id: Number(item.id || item.id_producto),
+        },
+        cantidad: Number(item.cantidad),
+        precioUnitario: Math.round(Number(item.precio)),
+        subtotal: Math.round(Number(item.precio) * Number(item.cantidad)),
+      })),
     };
 
     try {
@@ -104,30 +106,6 @@ export default function Checkout({ cartItems = [], user, onCompleteOrder }) {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">Dirección de Entrega</label>
-          <input
-            type="text"
-            name="direccion"
-            className="form-control bg-secondary text-white border-0"
-            value={formData.direccion}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Teléfono</label>
-          <input
-            type="text"
-            name="telefono"
-            className="form-control bg-secondary text-white border-0"
-            value={formData.telefono}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="mb-4">
           <label className="form-label">Método de Envío</label>
           <select
             name="envio"
@@ -140,8 +118,40 @@ export default function Checkout({ cartItems = [], user, onCompleteOrder }) {
           </select>
         </div>
 
-        <button 
-          type="submit" 
+        <div className="mb-3">
+          <label className="form-label">
+            Dirección de Entrega {formData.envio === 'Retiro en tienda' && <small className="text-secondary">(Opcional)</small>}
+          </label>
+          <input
+            type="text"
+            name="direccion"
+            placeholder={
+              formData.envio === 'Retiro en tienda'
+                ? 'Retiro en sucursal'
+                : 'Ej: Av. Pedro Aguirre Cerda 123'
+            }
+            className="form-control bg-secondary text-white border-0"
+            value={formData.direccion}
+            onChange={handleChange}
+            required={formData.envio === 'Despacho a domicilio'}
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="form-label">Teléfono</label>
+          <input
+            type="tel"
+            name="telefono"
+            placeholder="Ej: +56 9 8765 4321"
+            className="form-control bg-secondary text-white border-0"
+            value={formData.telefono}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
           className="btn btn-primary w-100 py-2 fw-bold"
           disabled={cartItems.length === 0}
         >

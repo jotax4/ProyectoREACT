@@ -1,18 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { orderService } from '../services/orderService';
 
+const ESTADOS_PEDIDO = [
+  'PENDIENTE',
+  'EN_PREPARACION',
+  'ENVIADO',
+  'ENTREGADO',
+  'CANCELADO',
+];
+
+const BADGE_ESTADO = {
+  PENDIENTE: 'bg-warning text-dark',
+  EN_PREPARACION: 'bg-info text-dark',
+  ENVIADO: 'bg-primary',
+  ENTREGADO: 'bg-success',
+  CANCELADO: 'bg-danger',
+};
+
 export default function AdminDashboard() {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
+  const [actualizandoId, setActualizandoId] = useState(null);
 
   const cargarPedidos = async () => {
     setLoading(true);
+    setErrorMsg('');
     try {
       const data = await orderService.getOrders();
-      setPedidos(data || []);
+      setPedidos(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error al cargar pedidos:', error);
+      setErrorMsg(
+        error.message?.includes('403')
+          ? 'Acceso denegado (403): verifica que tu usuario tenga rol ADMIN y vuelve a iniciar sesión.'
+          : 'No se pudieron cargar los pedidos desde el servidor.'
+      );
     } finally {
       setLoading(false);
     }
@@ -22,8 +46,38 @@ export default function AdminDashboard() {
     cargarPedidos();
   }, []);
 
-  // Cálculo de métricas
-  const totalVentas = pedidos.reduce((acc, p) => acc + (p.total || 0), 0);
+  const handleCambiarEstado = async (pedidoId, nuevoEstado) => {
+    setActualizandoId(pedidoId);
+    try {
+      const pedidoActualizado = await orderService.updateOrderStatus(pedidoId, nuevoEstado);
+      setPedidos((prev) =>
+        prev.map((p) => (p.id === pedidoId ? { ...p, estado: pedidoActualizado.estado || nuevoEstado } : p))
+      );
+      if (pedidoSeleccionado?.id === pedidoId) {
+        setPedidoSeleccionado((prev) => ({
+          ...prev,
+          estado: pedidoActualizado.estado || nuevoEstado,
+        }));
+      }
+    } catch (error) {
+      console.error('Error al actualizar estado:', error);
+      alert('No se pudo actualizar el estado del pedido.');
+    } finally {
+      setActualizandoId(null);
+    }
+  };
+
+  const formatearFecha = (fechaIso) => {
+    if (!fechaIso) return 'Sin fecha';
+    return new Date(fechaIso).toLocaleString('es-CL', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
+  };
+
+  const totalVentas = pedidos
+    .filter((p) => p.estado !== 'CANCELADO')
+    .reduce((acc, p) => acc + (Number(p.total) || 0), 0);
   const totalPedidos = pedidos.length;
   const ticketPromedio = totalPedidos > 0 ? totalVentas / totalPedidos : 0;
 
@@ -62,68 +116,104 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {errorMsg && <div className="alert alert-danger text-center">{errorMsg}</div>}
+
       {/* Tabla Maestro de Pedidos */}
       {loading ? (
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status"></div>
           <p className="mt-2 text-secondary">Obteniendo datos desde el backend...</p>
         </div>
-      ) : pedidos.length === 0 ? (
+      ) : pedidos.length === 0 && !errorMsg ? (
         <div className="alert alert-info text-center">No hay pedidos registrados en la base de datos.</div>
       ) : (
-        <div className="table-responsive bg-dark p-3 rounded border border-secondary shadow">
-          <table className="table table-dark table-hover align-middle mb-0">
-            <thead>
-              <tr>
-                <th># Orden</th>
-                <th>Cliente</th>
-                <th>Contacto</th>
-                <th>Método Envío</th>
-                <th>Total</th>
-                <th className="text-center">Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pedidos.map((pedido) => {
-                const nombreCliente = pedido.nombre || pedido.cliente?.nombre || 'Cliente';
-                const emailCliente = pedido.email || pedido.cliente?.email || 'N/A';
-                const fonoCliente = pedido.telefono || pedido.cliente?.telefono || 'N/A';
+        pedidos.length > 0 && (
+          <div className="table-responsive bg-dark p-3 rounded border border-secondary shadow">
+            <table className="table table-dark table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th># Orden</th>
+                  <th>Fecha</th>
+                  <th>Cliente</th>
+                  <th>Teléfono</th>
+                  <th>Envío</th>
+                  <th>Estado</th>
+                  <th>Total</th>
+                  <th className="text-center">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pedidos.map((pedido) => {
+                  const nombreCliente = pedido.persona?.nombre || pedido.nombre || 'Cliente';
+                  const emailCliente = pedido.persona?.email || pedido.email || 'Sin correo';
+                  const telefonoCliente = pedido.telefono || 'Sin teléfono';
+                  const metodoEnvio = pedido.metodoEnvio || 'No especificado';
+                  const estadoActual = pedido.estado || 'PENDIENTE';
 
-                return (
-                  <tr key={pedido.id}>
-                    <td>
-                      <span className="badge bg-primary fs-6">#{pedido.id}</span>
-                    </td>
-                    <td>
-                      <div className="fw-bold">{nombreCliente}</div>
-                      <small className="text-secondary">{emailCliente}</small>
-                    </td>
-                    <td><small>{fonoCliente}</small></td>
-                    <td>
-                      <span className={`badge ${pedido.envio === 'Retiro en tienda' ? 'bg-secondary' : 'bg-success'}`}>
-                        {pedido.envio || 'Despacho'}
-                      </span>
-                    </td>
-                    <td className="fw-bold text-success">
-                      ${pedido.total?.toLocaleString('es-CL')}
-                    </td>
-                    <td className="text-center">
-                      <button
-                        className="btn btn-sm btn-outline-info"
-                        onClick={() => setPedidoSeleccionado(pedido)}
-                      >
-                        👁️ Ver Detalle
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                  return (
+                    <tr key={pedido.id}>
+                      <td>
+                        <span className="badge bg-primary fs-6">#{pedido.id}</span>
+                      </td>
+                      <td>
+                        <small>{formatearFecha(pedido.fecha)}</small>
+                      </td>
+                      <td>
+                        <div className="fw-bold">{nombreCliente}</div>
+                        <small className="text-secondary">{emailCliente}</small>
+                      </td>
+                      <td>
+                        <small>{telefonoCliente}</small>
+                      </td>
+                      <td>
+                        <span
+                          className={`badge ${
+                            metodoEnvio.toLowerCase().includes('retiro')
+                              ? 'bg-secondary'
+                              : 'bg-info text-dark'
+                          }`}
+                        >
+                          {metodoEnvio}
+                        </span>
+                      </td>
+                      <td>
+                        <select
+                          className={`form-select form-select-sm fw-semibold border-0 ${
+                            BADGE_ESTADO[estadoActual] || 'bg-secondary text-white'
+                          }`}
+                          style={{ width: '165px' }}
+                          value={estadoActual}
+                          disabled={actualizandoId === pedido.id}
+                          onChange={(e) => handleCambiarEstado(pedido.id, e.target.value)}
+                        >
+                          {ESTADOS_PEDIDO.map((est) => (
+                            <option key={est} value={est} className="bg-dark text-white">
+                              {est.replace('_', ' ')}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="fw-bold text-success">
+                        ${Number(pedido.total || 0).toLocaleString('es-CL')}
+                      </td>
+                      <td className="text-center">
+                        <button
+                          className="btn btn-sm btn-outline-info"
+                          onClick={() => setPedidoSeleccionado(pedido)}
+                        >
+                          👁️ Ver Detalle
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )
       )}
 
-      {/* Modal para inspeccionar las líneas del detalle (DetalleProducto) */}
+      {/* Modal para inspeccionar el despacho y los productos */}
       {pedidoSeleccionado && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
@@ -139,38 +229,67 @@ export default function AdminDashboard() {
                 ></button>
               </div>
               <div className="modal-body">
-                <div className="row mb-3 p-2 bg-secondary bg-opacity-20 rounded small">
+                <div className="row mb-3 p-3 bg-secondary bg-opacity-10 rounded small">
                   <div className="col-md-6">
-                    <p className="mb-1"><strong>Cliente:</strong> {pedidoSeleccionado.nombre || pedidoSeleccionado.cliente?.nombre}</p>
-                    <p className="mb-1"><strong>Email:</strong> {pedidoSeleccionado.email || pedidoSeleccionado.cliente?.email}</p>
-                    <p className="mb-1"><strong>Teléfono:</strong> {pedidoSeleccionado.telefono || pedidoSeleccionado.cliente?.telefono}</p>
+                    <p className="mb-1">
+                      <strong>Cliente:</strong> {pedidoSeleccionado.persona?.nombre || 'Cliente'}
+                    </p>
+                    <p className="mb-1">
+                      <strong>Email:</strong> {pedidoSeleccionado.persona?.email || 'N/A'}
+                    </p>
+                    <p className="mb-1">
+                      <strong>Teléfono:</strong> {pedidoSeleccionado.telefono || 'No registrado'}
+                    </p>
+                    {pedidoSeleccionado.persona?.rut && (
+                      <p className="mb-0">
+                        <strong>RUT:</strong> {pedidoSeleccionado.persona.rut}
+                      </p>
+                    )}
                   </div>
                   <div className="col-md-6">
-                    <p className="mb-1"><strong>Dirección:</strong> {pedidoSeleccionado.direccion || pedidoSeleccionado.cliente?.direccion}</p>
-                    <p className="mb-1"><strong>Método de Envío:</strong> {pedidoSeleccionado.envio}</p>
+                    <p className="mb-1">
+                      <strong>Fecha:</strong> {formatearFecha(pedidoSeleccionado.fecha)}
+                    </p>
+                    <p className="mb-1">
+                      <strong>Método de Envío:</strong> {pedidoSeleccionado.metodoEnvio || 'No especificado'}
+                    </p>
+                    <p className="mb-1">
+                      <strong>Dirección:</strong> {pedidoSeleccionado.direccion || 'Retiro en tienda / Sin dirección'}
+                    </p>
+                    <p className="mb-0">
+                      <strong>Estado:</strong>{' '}
+                      <span className={`badge ${BADGE_ESTADO[pedidoSeleccionado.estado] || 'bg-secondary'}`}>
+                        {(pedidoSeleccionado.estado || 'PENDIENTE').replace('_', ' ')}
+                      </span>
+                    </p>
                   </div>
                 </div>
 
-                <h6 className="fw-bold mb-2">Líneas de Productos (DetalleProducto):</h6>
+                <h6 className="fw-bold mb-2">Líneas de Productos:</h6>
                 <div className="table-responsive">
                   <table className="table table-dark table-striped align-middle mb-0">
                     <thead>
                       <tr>
-                        <th>Producto ID</th>
+                        <th>Producto</th>
                         <th>Precio Unitario</th>
                         <th className="text-center">Cantidad</th>
                         <th className="text-end">Subtotal</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {(pedidoSeleccionado.detalles || pedidoSeleccionado.items || []).map((det, idx) => {
-                        const precio = det.precioUnitario || det.precio || 0;
-                        const cant = det.cantidad || 0;
-                        const sub = det.subtotal || (precio * cant);
+                      {(pedidoSeleccionado.detalles || []).map((det, idx) => {
+                        const precio = Number(det.precioUnitario || det.producto?.precio || 0);
+                        const cant = Number(det.cantidad || 0);
+                        const sub = Number(det.subtotal || precio * cant);
+                        const prodId = det.producto?.id || det.productoId;
+                        const prodNombre = det.producto?.nombre || `Producto #${prodId || idx + 1}`;
 
                         return (
                           <tr key={det.id || idx}>
-                            <td>#{det.productoId || det.id || idx + 1}</td>
+                            <td>
+                              <span className="fw-semibold">{prodNombre}</span>
+                              {prodId && <small className="text-secondary ms-2">(#{prodId})</small>}
+                            </td>
                             <td>${precio.toLocaleString('es-CL')}</td>
                             <td className="text-center">{cant}</td>
                             <td className="text-end fw-bold">${sub.toLocaleString('es-CL')}</td>
@@ -184,7 +303,7 @@ export default function AdminDashboard() {
                 <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary">
                   <span className="fw-bold fs-5">Monto Total:</span>
                   <span className="fs-4 fw-bold text-success">
-                    ${pedidoSeleccionado.total?.toLocaleString('es-CL')}
+                    ${Number(pedidoSeleccionado.total || 0).toLocaleString('es-CL')}
                   </span>
                 </div>
               </div>

@@ -45,8 +45,8 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Rutas públicas: Autenticación y Swagger UI
-                .requestMatchers("/api/v1/auth/**").permitAll()
+                // Rutas públicas: Autenticación, manejo de errores y Swagger UI
+                .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
 
                 // Catálogo: lectura pública para tienda, clientes y vendedores

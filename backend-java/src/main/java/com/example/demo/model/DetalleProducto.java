@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "detalle_productos")
-public  class DetalleProducto {
+public class DetalleProducto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,7 +13,7 @@ public  class DetalleProducto {
 
     @ManyToOne
     @JoinColumn(name = "pedido_id", nullable = false)
-    @JsonIgnore // Evita ciclos infinitos al serializar a JSON
+    @JsonIgnore
     private Pedido pedido;
 
     @ManyToOne
@@ -23,6 +23,14 @@ public  class DetalleProducto {
     private Integer cantidad;
     private Integer precioUnitario;
     private Integer subtotal;
+
+    @PrePersist
+    @PreUpdate
+    public void calcularSubtotal() {
+        if (this.subtotal == null && this.cantidad != null && this.precioUnitario != null) {
+            this.subtotal = this.cantidad * this.precioUnitario;
+        }
+    }
 
     public DetalleProducto() {}
 
@@ -34,7 +42,6 @@ public  class DetalleProducto {
         this.subtotal = cantidad * precioUnitario;
     }
 
-    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
