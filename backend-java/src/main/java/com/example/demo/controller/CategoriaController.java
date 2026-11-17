@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Categoria;
+import com.example.demo.entity.CategoriaEntity;
 import com.example.demo.service.CategoriaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -24,27 +24,27 @@ public class CategoriaController {
 
     @GetMapping
     @Operation(summary = "Listar todas las categorías")
-    public ResponseEntity<List<Categoria>> listarCategorias() {
+    public ResponseEntity<List<CategoriaEntity>> listarCategorias() {
         return ResponseEntity.ok(categoriaService.listarTodas());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener una categoría por su ID")
-    public ResponseEntity<Categoria> obtenerCategoria(@PathVariable Long id) {
+    public ResponseEntity<CategoriaEntity> obtenerCategoria(@PathVariable Long id) {
         return ResponseEntity.ok(categoriaService.obtenerPorId(id));
     }
 
     @PostMapping
     @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Crear una nueva categoría (Requiere rol ADMIN)")
-    public ResponseEntity<Categoria> crearCategoria(@Valid @RequestBody Categoria categoria) {
+    public ResponseEntity<CategoriaEntity> crearCategoria(@Valid @RequestBody CategoriaEntity categoria) {
         return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.crear(categoria));
     }
 
     @PutMapping("/{id}")
     @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Actualizar una categoría existente (Requiere rol ADMIN)")
-    public ResponseEntity<Categoria> actualizarCategoria(@PathVariable Long id, @Valid @RequestBody Categoria categoria) {
+    public ResponseEntity<CategoriaEntity> actualizarCategoria(@PathVariable Long id, @Valid @RequestBody CategoriaEntity categoria) {
         return ResponseEntity.ok(categoriaService.actualizar(id, categoria));
     }
 

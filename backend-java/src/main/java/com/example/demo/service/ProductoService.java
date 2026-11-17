@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.model.Producto;
+import com.example.demo.entity.ProductoEntity;
 import com.example.demo.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,19 +13,19 @@ public class ProductoService {
     @Autowired
     private ProductoRepository productoRepository;
 
-    public List<Producto> listarTodos() {
+    public List<ProductoEntity> listarTodos() {
         return productoRepository.findAll();
     }
 
-    public List<Producto> obtenerPorCategoria(String categoria) {
+    public List<ProductoEntity> obtenerPorCategoria(String categoria) {
         return productoRepository.findByCategoriaNombreIgnoreCase(categoria);
     }
 
-    public List<Producto> obtenerOfertas() {
+    public List<ProductoEntity> obtenerOfertas() {
         return productoRepository.findByOfertaTrue();
     }
 
-    public Producto guardarProducto(Producto producto) {
+    public ProductoEntity guardarProducto(ProductoEntity producto) {
         return productoRepository.save(producto);
     }
 

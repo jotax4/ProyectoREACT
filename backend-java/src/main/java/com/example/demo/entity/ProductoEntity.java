@@ -1,10 +1,10 @@
-package com.example.demo.model;
+package com.example.demo.entity;
 
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "productos")
-public class Producto {
+public class ProductoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,7 +14,7 @@ public class Producto {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "categoria_id")
-    private Categoria categoria;
+    private CategoriaEntity categoria;
 
     private Integer precio;
     private Boolean oferta;
@@ -27,8 +27,8 @@ public class Producto {
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public Categoria getCategoria() { return categoria; }
-    public void setCategoria(Categoria categoria) { this.categoria = categoria; }
+    public CategoriaEntity getCategoria() { return categoria; }
+    public void setCategoria(CategoriaEntity categoria) { this.categoria = categoria; }
 
     public Integer getPrecio() { return precio; }
     public void setPrecio(Integer precio) { this.precio = precio; }

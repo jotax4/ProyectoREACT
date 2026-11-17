@@ -1,11 +1,13 @@
-package com.example.demo.model;
+package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+import com.example.demo.model.Rol;
+
 @Entity
 @Table(name = "personas")
-public class Persona {
+public class PersonaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +30,7 @@ public class Persona {
     @Column(nullable = false)
     private Rol rol = Rol.CLIENTE;
 
-    public Persona() {}
+    public PersonaEntity() {}
 
     // Getters y Setters
     public Long getId() { return id; }

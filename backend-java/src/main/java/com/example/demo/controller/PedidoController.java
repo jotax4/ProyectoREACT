@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
+import com.example.demo.entity.PedidoEntity;
 import com.example.demo.model.EstadoPedido;
-import com.example.demo.model.Pedido;
 import com.example.demo.service.PedidoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -26,13 +26,13 @@ public class PedidoController {
 
     @GetMapping
     @Operation(summary = "Listar todos los pedidos", description = "Obtiene el listado completo de pedidos registrados (Roles: ADMIN, VENDEDOR)")
-    public ResponseEntity<List<Pedido>> obtenerTodos() {
+    public ResponseEntity<List<PedidoEntity>> obtenerTodos() {
         return ResponseEntity.ok(pedidoService.obtenerTodos());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener pedido por ID", description = "Consulta el detalle de un pedido específico por su identificador (Roles: ADMIN, VENDEDOR)")
-    public ResponseEntity<Pedido> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<PedidoEntity> obtenerPorId(@PathVariable Long id) {
         return pedidoService.obtenerPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -40,14 +40,14 @@ public class PedidoController {
 
     @PostMapping
     @Operation(summary = "Crear un nuevo pedido", description = "Registra una nueva orden de compra con datos de despacho y detalle de productos (Requiere sesión iniciada)")
-    public ResponseEntity<?> crearPedido(@RequestBody Pedido pedido) {
+    public ResponseEntity<?> crearPedido(@RequestBody PedidoEntity pedido) {
         try {
             if (pedido.getMetodoEnvio() == null || pedido.getMetodoEnvio().isBlank()) {
                 boolean tieneDireccion = pedido.getDireccion() != null && !pedido.getDireccion().isBlank();
                 pedido.setMetodoEnvio(tieneDireccion ? "Despacho a domicilio" : "Retiro en tienda");
             }
 
-            Pedido nuevoPedido = pedidoService.crearPedido(pedido);
+            PedidoEntity nuevoPedido = pedidoService.crearPedido(pedido);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
@@ -68,7 +68,7 @@ public class PedidoController {
 
         try {
             EstadoPedido nuevoEstado = EstadoPedido.valueOf(estadoStr.toUpperCase());
-            Pedido pedidoActualizado = pedidoService.actualizarEstado(id, nuevoEstado);
+            PedidoEntity pedidoActualizado = pedidoService.actualizarEstado(id, nuevoEstado);
             return ResponseEntity.ok(pedidoActualizado);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Estado no válido. Valores aceptados: PENDIENTE, EN_PREPARACION, ENVIADO, ENTREGADO, CANCELADO");

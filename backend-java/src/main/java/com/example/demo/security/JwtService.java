@@ -1,11 +1,12 @@
 package com.example.demo.security;
 
-import com.example.demo.model.Persona;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
+
+import com.example.demo.entity.PersonaEntity;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -25,7 +26,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generarToken(Persona persona) {
+    public String generarToken(PersonaEntity persona) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("rol", persona.getRol().name());
         claims.put("nombre", persona.getNombre());

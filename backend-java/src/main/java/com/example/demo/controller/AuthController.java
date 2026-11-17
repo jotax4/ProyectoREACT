@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Persona;
+import com.example.demo.entity.PersonaEntity;
 import com.example.demo.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,9 +23,9 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Registrar usuario", description = "Valida mayoría de edad (+18), encripta la contraseña y crea una cuenta con rol CLIENTE por defecto")
-    public ResponseEntity<?> registrarPersona(@RequestBody Persona persona) {
+    public ResponseEntity<?> registrarPersona(@RequestBody PersonaEntity persona) {
         try {
-            Persona nuevaPersona = authService.registrar(persona);
+            PersonaEntity nuevaPersona = authService.registrar(persona);
 
             Map<String, Object> respuesta = new HashMap<>();
             respuesta.put("mensaje", "Usuario registrado correctamente");

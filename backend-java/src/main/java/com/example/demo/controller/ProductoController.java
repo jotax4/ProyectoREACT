@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Producto;
+import com.example.demo.entity.ProductoEntity;
 import com.example.demo.service.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -26,7 +26,7 @@ public class ProductoController {
             summary = "Listar o filtrar productos",
             description = "Obtiene todos los productos disponibles, o filtra por categoría (?categoria=...) o por ofertas (?oferta=true). Acceso público."
     )
-    public ResponseEntity<List<Producto>> obtenerProductos(
+    public ResponseEntity<List<ProductoEntity>> obtenerProductos(
             @RequestParam(required = false) String categoria,
             @RequestParam(required = false) Boolean oferta) {
 
@@ -45,8 +45,8 @@ public class ProductoController {
             summary = "Crear un nuevo producto",
             description = "Registra un producto en el catálogo (Solo rol ADMIN)"
     )
-    public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
-        Producto nuevoProducto = productoService.guardarProducto(producto);
+    public ResponseEntity<ProductoEntity> crearProducto(@RequestBody ProductoEntity producto) {
+        ProductoEntity nuevoProducto = productoService.guardarProducto(producto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
     }
 

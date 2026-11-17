@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.model.Persona;
+import com.example.demo.entity.PersonaEntity;
 import com.example.demo.model.Rol;
 import com.example.demo.repository.PersonaRepository;
 import com.example.demo.security.JwtService;
@@ -26,7 +26,7 @@ public class AuthService {
     @Autowired
     private JwtService jwtService;
 
-    public Persona registrar(Persona persona) throws Exception {
+    public PersonaEntity registrar(PersonaEntity persona) throws Exception {
         // 1. Validación de edad (+18)
         if (persona.getFechaNacimiento() == null) {
             throw new Exception("La fecha de nacimiento es obligatoria.");
@@ -56,10 +56,10 @@ public class AuthService {
     }
 
     public Map<String, Object> login(String email, String password) throws Exception {
-        Optional<Persona> personaOpt = personaRepository.findByEmail(email);
+        Optional<PersonaEntity> personaOpt = personaRepository.findByEmail(email);
 
         if (personaOpt.isPresent() && passwordEncoder.matches(password, personaOpt.get().getPassword())) {
-            Persona persona = personaOpt.get();
+            PersonaEntity persona = personaOpt.get();
             String token = jwtService.generarToken(persona);
 
             Map<String, Object> respuesta = new HashMap<>();

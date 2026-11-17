@@ -1,11 +1,11 @@
-package com.example.demo.model;
+package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "categorias")
-public class Categoria {
+public class CategoriaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,10 +18,10 @@ public class Categoria {
     @Column(length = 255)
     private String descripcion;
 
-    public Categoria() {
+    public CategoriaEntity() {
     }
 
-    public Categoria(Long id, String nombre, String descripcion) {
+    public CategoriaEntity(Long id, String nombre, String descripcion) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;

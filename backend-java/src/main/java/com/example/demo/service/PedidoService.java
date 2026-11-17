@@ -1,10 +1,10 @@
 package com.example.demo.service;
 
-import com.example.demo.model.DetalleProducto;
+import com.example.demo.entity.DetalleProductoEntity;
+import com.example.demo.entity.PedidoEntity;
+import com.example.demo.entity.PersonaEntity;
+import com.example.demo.entity.ProductoEntity;
 import com.example.demo.model.EstadoPedido;
-import com.example.demo.model.Pedido;
-import com.example.demo.model.Persona;
-import com.example.demo.model.Producto;
 import com.example.demo.repository.PedidoRepository;
 import com.example.demo.repository.PersonaRepository;
 import com.example.demo.repository.ProductoRepository;
@@ -29,17 +29,17 @@ public class PedidoService {
     private ProductoRepository productoRepository;
 
     @Transactional(readOnly = true)
-    public List<Pedido> obtenerTodos() {
+    public List<PedidoEntity> obtenerTodos() {
         return pedidoRepository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public Optional<Pedido> obtenerPorId(Long id) {
+    public Optional<PedidoEntity> obtenerPorId(Long id) {
         return pedidoRepository.findById(id);
     }
 
     @Transactional
-    public Pedido crearPedido(Pedido pedido) {
+    public PedidoEntity crearPedido(PedidoEntity pedido) {
         if (pedido.getFecha() == null) {
             pedido.setFecha(LocalDateTime.now());
         }
@@ -63,7 +63,7 @@ public class PedidoService {
 
         // Vincular Persona existente desde la base de datos
         if (pedido.getPersona() != null && pedido.getPersona().getId() != null) {
-            Persona persona = personaRepository.findById(pedido.getPersona().getId())
+            PersonaEntity persona = personaRepository.findById(pedido.getPersona().getId())
                     .orElseThrow(() -> new RuntimeException("Persona no encontrada con ID: " + pedido.getPersona().getId()));
             pedido.setPersona(persona);
         }
@@ -71,11 +71,11 @@ public class PedidoService {
         // Vincular cada DetalleProducto con el Pedido y su Producto real
         double totalCalculado = 0.0;
         if (pedido.getDetalles() != null) {
-            for (DetalleProducto detalle : pedido.getDetalles()) {
+            for (DetalleProductoEntity detalle : pedido.getDetalles()) {
                 detalle.setPedido(pedido);
 
                 if (detalle.getProducto() != null && detalle.getProducto().getId() != null) {
-                    Producto producto = productoRepository.findById(detalle.getProducto().getId())
+                    ProductoEntity producto = productoRepository.findById(detalle.getProducto().getId())
                             .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + detalle.getProducto().getId()));
                     detalle.setProducto(producto);
 
@@ -100,8 +100,8 @@ public class PedidoService {
     }
 
     @Transactional
-    public Pedido actualizarEstado(Long id, EstadoPedido nuevoEstado) {
-        Pedido pedido = pedidoRepository.findById(id)
+    public PedidoEntity actualizarEstado(Long id, EstadoPedido nuevoEstado) {
+        PedidoEntity pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado con ID: " + id));
 
         pedido.setEstado(nuevoEstado);

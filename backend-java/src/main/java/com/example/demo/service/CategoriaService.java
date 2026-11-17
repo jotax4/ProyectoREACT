@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.model.Categoria;
+import com.example.demo.entity.CategoriaEntity;
 import com.example.demo.repository.CategoriaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,16 +15,16 @@ public class CategoriaService {
     @Autowired
     private CategoriaRepository categoriaRepository;
 
-    public List<Categoria> listarTodas() {
+    public List<CategoriaEntity> listarTodas() {
         return categoriaRepository.findAll();
     }
 
-    public Categoria obtenerPorId(Long id) {
+    public CategoriaEntity obtenerPorId(Long id) {
         return categoriaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada con ID: " + id));
     }
 
-    public Categoria crear(Categoria categoria) {
+    public CategoriaEntity crear(CategoriaEntity categoria) {
         if (categoriaRepository.existsByNombreIgnoreCase(categoria.getNombre().trim())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe una categoría con ese nombre");
         }
@@ -32,15 +32,15 @@ public class CategoriaService {
         return categoriaRepository.save(categoria);
     }
 
-    public Categoria actualizar(Long id, Categoria detalles) {
-        Categoria categoriaExistente = obtenerPorId(id);
+    public CategoriaEntity actualizar(Long id, CategoriaEntity detalles) {
+        CategoriaEntity categoriaExistente = obtenerPorId(id);
         categoriaExistente.setNombre(detalles.getNombre().trim());
         categoriaExistente.setDescripcion(detalles.getDescripcion());
         return categoriaRepository.save(categoriaExistente);
     }
 
     public void eliminar(Long id) {
-        Categoria categoria = obtenerPorId(id);
+        CategoriaEntity categoria = obtenerPorId(id);
         categoriaRepository.delete(categoria);
     }
 }

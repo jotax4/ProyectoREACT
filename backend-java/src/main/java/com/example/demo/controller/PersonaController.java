@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Persona;
+import com.example.demo.entity.PersonaEntity;
 import com.example.demo.model.Rol;
 import com.example.demo.repository.PersonaRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,13 +31,13 @@ public class PersonaController {
 
     @GetMapping
     @Operation(summary = "Listar todos los usuarios", description = "Obtiene la lista completa de personas registradas en el sistema (Solo rol ADMIN)")
-    public ResponseEntity<List<Persona>> obtenerTodas() {
+    public ResponseEntity<List<PersonaEntity>> obtenerTodas() {
         return ResponseEntity.ok(personaRepository.findAll());
     }
 
     @PostMapping
     @Operation(summary = "Crear usuario con rol", description = "Permite al administrador registrar usuarios (ADMIN, VENDEDOR o CLIENTE) encriptando su contraseña")
-    public ResponseEntity<?> crearPersona(@Valid @RequestBody Persona persona) {
+    public ResponseEntity<?> crearPersona(@Valid @RequestBody PersonaEntity persona) {
 
         if (persona.getRut() == null || persona.getRut().isBlank()) {
             return ResponseEntity
@@ -79,7 +79,7 @@ public class PersonaController {
             persona.setRol(Rol.CLIENTE);
         }
 
-        Persona nuevaPersona = personaRepository.save(persona);
+        PersonaEntity nuevaPersona = personaRepository.save(persona);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaPersona);
     }
 
