@@ -1,37 +1,74 @@
-// frontend/src/services/productService.js
+// src/services/productService.js
+import { authService } from './authService';
 
-const API_URL = 'http://localhost:8081/api/products';
+const API_URL = 'http://localhost:8081/api/v1/productos';
+
+const getHeaders = (withAuth = false) => {
+  const token = authService.getToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(withAuth && token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
 
 export const productService = {
-  getProducts: async () => {
-    try {
-      const res = await fetch(API_URL);
-      if (res.ok) return await res.json();
-    } catch (error) {
-      console.warn('Backend no disponible, usando fallback local');
+  getProducts: async (categoria = '') => {
+    const query =
+      categoria && categoria !== 'Todas'
+        ? `?categoria=${encodeURIComponent(categoria)}`
+        : '';
+    const response = await fetch(`${API_URL}${query}`, {
+      method: 'GET',
+      headers: getHeaders(false),
+    });
+    if (!response.ok) {
+      throw new Error(`Error ${response.status} al obtener productos`);
     }
-    const local = localStorage.getItem('products');
-    return local ? JSON.parse(local) : [];
+    return await response.json();
   },
 
-  saveProduct: async (product) => {
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product)
-      });
-      if (res.ok) return await res.json();
-    } catch (error) {
-      console.error('Error guardando producto:', error);
+  getOffers: async () => {
+    const response = await fetch(`${API_URL}?oferta=true`, {
+      method: 'GET',
+      headers: getHeaders(false),
+    });
+    if (!response.ok) {
+      throw new Error(`Error ${response.status} al obtener ofertas`);
     }
+    return await response.json();
+  },
+
+  createProduct: async (product) => {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: getHeaders(true),
+      body: JSON.stringify(product),
+    });
+    if (!response.ok) {
+      throw new Error(`Error ${response.status} al crear producto`);
+    }
+    return await response.json();
+  },
+
+  updateProduct: async (id, product) => {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(true),
+      body: JSON.stringify(product),
+    });
+    if (!response.ok) {
+      throw new Error(`Error ${response.status} al actualizar producto`);
+    }
+    return await response.json();
   },
 
   deleteProduct: async (id) => {
-    try {
-      await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-    } catch (error) {
-      console.error('Error eliminando producto:', error);
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders(true),
+    });
+    if (!response.ok) {
+      throw new Error(`Error ${response.status} al eliminar producto`);
     }
-  }
+  },
 };

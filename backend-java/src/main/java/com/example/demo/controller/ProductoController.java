@@ -22,10 +22,7 @@ public class ProductoController {
     private ProductoService productoService;
 
     @GetMapping
-    @Operation(
-            summary = "Listar o filtrar productos",
-            description = "Obtiene todos los productos disponibles, o filtra por categoría (?categoria=...) o por ofertas (?oferta=true). Acceso público."
-    )
+    @Operation(summary = "Listar o filtrar productos")
     public ResponseEntity<List<ProductoEntity>> obtenerProductos(
             @RequestParam(required = false) String categoria,
             @RequestParam(required = false) Boolean oferta) {
@@ -41,21 +38,23 @@ public class ProductoController {
 
     @PostMapping
     @SecurityRequirement(name = "Bearer Authentication")
-    @Operation(
-            summary = "Crear un nuevo producto",
-            description = "Registra un producto en el catálogo (Solo rol ADMIN)"
-    )
+    @Operation(summary = "Crear un nuevo producto (Solo rol ADMIN)")
     public ResponseEntity<ProductoEntity> crearProducto(@RequestBody ProductoEntity producto) {
-        ProductoEntity nuevoProducto = productoService.guardarProducto(producto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(productoService.guardarProducto(producto));
+    }
+
+    @PutMapping("/{id}")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(summary = "Actualizar un producto (Solo rol ADMIN)")
+    public ResponseEntity<ProductoEntity> actualizarProducto(
+            @PathVariable Long id,
+            @RequestBody ProductoEntity producto) {
+        return ResponseEntity.ok(productoService.actualizarProducto(id, producto));
     }
 
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "Bearer Authentication")
-    @Operation(
-            summary = "Eliminar un producto",
-            description = "Elimina un producto del catálogo por su ID (Solo rol ADMIN)"
-    )
+    @Operation(summary = "Eliminar un producto (Solo rol ADMIN)")
     public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
         productoService.eliminarProducto(id);
         return ResponseEntity.noContent().build();

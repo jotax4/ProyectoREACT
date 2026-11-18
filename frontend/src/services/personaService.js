@@ -1,54 +1,44 @@
 // src/services/personaService.js
-const BASE_URL = "http://localhost:9090/api/v1/entities/personas";
+import { authService } from './authService';
+
+const BASE_URL = 'http://localhost:8081/api/v1/personas';
+
+const getAuthHeaders = () => {
+  const token = authService.getToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
 
 export const personaService = {
-
-  // GET
   getAll: async () => {
-    const response = await fetch(BASE_URL);
+    const response = await fetch(BASE_URL, { headers: getAuthHeaders() });
+    if (!response.ok) throw new Error(`Error ${response.status} al listar usuarios`);
     return await response.json();
   },
 
-  // POST
   create: async (persona) => {
-    const response = await fetch(BASE_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(persona)
+    return await fetch(BASE_URL, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(persona),
     });
-    return response;
   },
 
-  // PUT
-  update: async (id, persona) => {
-    const response = await fetch(`${BASE_URL}/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(persona)
-    });
-    return response;
-  },
-
-  // DELETE
   remove: async (id) => {
-    const response = await fetch(`${BASE_URL}/${id}`, {
-      method: "DELETE"
+    return await fetch(`${BASE_URL}/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
     });
-    return response;
   },
 
-  // Alias para compatibilidad con pruebas unitarias
   delete: async (id) => {
-    const response = await fetch(`${BASE_URL}/${id}`, {
-      method: "DELETE"
+    return await fetch(`${BASE_URL}/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
     });
-    return response;
-  }
-
+  },
 };
 
 export default personaService;

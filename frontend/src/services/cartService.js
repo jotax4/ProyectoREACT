@@ -1,27 +1,28 @@
-// frontend/src/services/cartService.js
+// src/services/cartService.js
 export const cartService = {
-  getCart: () => {
-    const cart = localStorage.getItem('cart');
-    return cart ? JSON.parse(cart) : [];
-  },
+  addItem: (currentCart, product) => {
+    const precioFinal =
+      product.oferta && Number(product.precioOferta) > 0
+        ? Number(product.precioOferta)
+        : Number(product.precio);
 
-  addToCart: (product) => {
-    const cart = cartService.getCart();
-    const index = cart.findIndex(item => item.id === product.id);
+    const index = currentCart.findIndex((item) => item.id === product.id);
     if (index >= 0) {
-      cart[index].cantidad += 1;
-    } else {
-      cart.push({ ...product, cantidad: 1 });
+      return currentCart.map((item, idx) =>
+        idx === index ? { ...item, cantidad: item.cantidad + 1 } : item
+      );
     }
-    localStorage.setItem('cart', JSON.stringify(cart));
+    return [...currentCart, { ...product, precio: precioFinal, cantidad: 1 }];
   },
 
-  removeFromCart: (id) => {
-    const cart = cartService.getCart().filter(item => item.id !== id);
-    localStorage.setItem('cart', JSON.stringify(cart));
+  updateQuantity: (currentCart, productId, newQuantity) => {
+    if (newQuantity < 1) return currentCart;
+    return currentCart.map((item) =>
+      item.id === productId ? { ...item, cantidad: newQuantity } : item
+    );
   },
 
-  clearCart: () => {
-    localStorage.removeItem('cart');
-  }
-}; 
+  removeItem: (currentCart, productId) => {
+    return currentCart.filter((item) => item.id !== productId);
+  },
+};
