@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,13 +26,20 @@ public class PedidoController {
     private PedidoService pedidoService;
 
     @GetMapping
-    @Operation(summary = "Listar todos los pedidos", description = "Obtiene el listado completo de pedidos registrados (Roles: ADMIN, VENDEDOR)")
+    @Operation(summary = "Listar todos los pedidos (Roles: ADMIN, VENDEDOR)")
     public ResponseEntity<List<PedidoEntity>> obtenerTodos() {
         return ResponseEntity.ok(pedidoService.obtenerTodos());
     }
 
+    @GetMapping("/mis-pedidos")
+    @Operation(summary = "Listar los pedidos del cliente autenticado")
+    public ResponseEntity<List<PedidoEntity>> obtenerMisPedidos(Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(pedidoService.obtenerPorEmailCliente(email));
+    }
+
     @GetMapping("/{id}")
-    @Operation(summary = "Obtener pedido por ID", description = "Consulta el detalle de un pedido específico por su identificador (Roles: ADMIN, VENDEDOR)")
+    @Operation(summary = "Obtener pedido por ID (Roles: ADMIN, VENDEDOR)")
     public ResponseEntity<PedidoEntity> obtenerPorId(@PathVariable Long id) {
         return pedidoService.obtenerPorId(id)
                 .map(ResponseEntity::ok)
@@ -39,15 +47,16 @@ public class PedidoController {
     }
 
     @PostMapping
-    @Operation(summary = "Crear un nuevo pedido", description = "Registra una nueva orden de compra con datos de despacho y detalle de productos (Requiere sesión iniciada)")
-    public ResponseEntity<?> crearPedido(@RequestBody PedidoEntity pedido) {
+    @Operation(summary = "Crear un nuevo pedido (Requiere sesión iniciada)")
+    public ResponseEntity<?> crearPedido(@RequestBody PedidoEntity pedido, Authentication authentication) {
         try {
             if (pedido.getMetodoEnvio() == null || pedido.getMetodoEnvio().isBlank()) {
                 boolean tieneDireccion = pedido.getDireccion() != null && !pedido.getDireccion().isBlank();
                 pedido.setMetodoEnvio(tieneDireccion ? "Despacho a domicilio" : "Retiro en tienda");
             }
 
-            PedidoEntity nuevoPedido = pedidoService.crearPedido(pedido);
+            String emailAuth = authentication != null ? authentication.getName() : null;
+            PedidoEntity nuevoPedido = pedidoService.crearPedido(pedido, emailAuth);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
@@ -56,7 +65,7 @@ public class PedidoController {
     }
 
     @PatchMapping("/{id}/estado")
-    @Operation(summary = "Actualizar estado del pedido", description = "Cambia el estado a PENDIENTE, EN_PREPARACION, ENVIADO, ENTREGADO o CANCELADO (Roles: ADMIN, VENDEDOR)")
+    @Operation(summary = "Actualizar estado del pedido (Roles: ADMIN, VENDEDOR)")
     public ResponseEntity<?> cambiarEstado(
             @PathVariable Long id,
             @RequestBody Map<String, String> payload

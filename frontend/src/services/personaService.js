@@ -26,6 +26,14 @@ export const personaService = {
     });
   },
 
+  update: async (id, persona) => {
+    return await fetch(`${BASE_URL}/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(persona),
+    });
+  },
+
   remove: async (id) => {
     return await fetch(`${BASE_URL}/${id}`, {
       method: 'DELETE',

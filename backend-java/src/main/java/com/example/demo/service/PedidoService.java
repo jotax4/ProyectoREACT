@@ -30,7 +30,12 @@ public class PedidoService {
 
     @Transactional(readOnly = true)
     public List<PedidoEntity> obtenerTodos() {
-        return pedidoRepository.findAll();
+        return pedidoRepository.findAllByOrderByFechaDesc();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PedidoEntity> obtenerPorEmailCliente(String email) {
+        return pedidoRepository.findByPersonaEmailOrderByFechaDesc(email);
     }
 
     @Transactional(readOnly = true)
@@ -39,7 +44,7 @@ public class PedidoService {
     }
 
     @Transactional
-    public PedidoEntity crearPedido(PedidoEntity pedido) {
+    public PedidoEntity crearPedido(PedidoEntity pedido, String emailAutenticado) {
         if (pedido.getFecha() == null) {
             pedido.setFecha(LocalDateTime.now());
         }
@@ -47,7 +52,6 @@ public class PedidoService {
             pedido.setEstado(EstadoPedido.PENDIENTE);
         }
 
-        // Normalizar datos de despacho y contacto
         if (pedido.getDireccion() != null) {
             pedido.setDireccion(pedido.getDireccion().trim());
         }
@@ -61,14 +65,15 @@ public class PedidoService {
             pedido.setMetodoEnvio(pedido.getMetodoEnvio().trim());
         }
 
-        // Vincular Persona existente desde la base de datos
+        // Vincular Persona por ID o por el correo extraído del token JWT
         if (pedido.getPersona() != null && pedido.getPersona().getId() != null) {
             PersonaEntity persona = personaRepository.findById(pedido.getPersona().getId())
                     .orElseThrow(() -> new RuntimeException("Persona no encontrada con ID: " + pedido.getPersona().getId()));
             pedido.setPersona(persona);
+        } else if (emailAutenticado != null && !emailAutenticado.isBlank()) {
+            personaRepository.findByEmail(emailAutenticado).ifPresent(pedido::setPersona);
         }
 
-        // Vincular cada DetalleProducto con el Pedido y su Producto real
         double totalCalculado = 0.0;
         if (pedido.getDetalles() != null) {
             for (DetalleProductoEntity detalle : pedido.getDetalles()) {
@@ -80,7 +85,7 @@ public class PedidoService {
                     detalle.setProducto(producto);
 
                     if (detalle.getPrecioUnitario() == null && producto.getPrecio() != null) {
-                        detalle.setPrecioUnitario(((Number) producto.getPrecio()).intValue());
+                        detalle.setPrecioUnitario(producto.getPrecio());
                     }
                 }
 

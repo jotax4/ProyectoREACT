@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
 import { Cart } from './pages/Cart';
@@ -7,6 +7,7 @@ import Checkout from './pages/Checkout';
 import { PaymentSuccess } from './pages/PaymentSuccess';
 import { PaymentFailure } from './pages/PaymentFailure';
 import AdminDashboard from './pages/AdminDashboard';
+import { MisPedidos } from './pages/MisPedidos';
 import { Categorias } from './pages/Categorias';
 import { Ofertas } from './pages/Ofertas';
 import { Auth } from './pages/Auth';
@@ -17,15 +18,25 @@ import { cartService } from './services/cartService';
 import { orderService } from './services/orderService';
 import { authService } from './services/authService';
 
-function ProtectedRoute({ user, children }) {
+function ProtectedRoute({ user, allowedRoles, children }) {
   const currentUser = user || authService.getCurrentUser();
+
   if (!currentUser) {
     return <Navigate to="/login" replace />;
   }
+
+  if (allowedRoles && allowedRoles.length > 0) {
+    const rolActual = (currentUser.rol || '').replace('ROLE_', '').toUpperCase();
+    if (!allowedRoles.includes(rolActual)) {
+      return <Navigate to="/" replace />;
+    }
+  }
+
   return children;
 }
 
 export function App() {
+  const navigate = useNavigate();
   const [cart, setCart] = useState([]);
   const [lastOrder, setLastOrder] = useState(null);
   const [user, setUser] = useState(null);
@@ -54,12 +65,19 @@ export function App() {
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
+    const rol = (userData?.rol || '').replace('ROLE_', '').toUpperCase();
+    if (rol === 'ADMIN' || rol === 'VENDEDOR') {
+      navigate('/admin');
+    } else {
+      navigate('/');
+    }
   };
 
   const handleLogout = () => {
     authService.logout();
     setUser(null);
     setCart([]);
+    navigate('/login');
   };
 
   const cartCount = cart.reduce((acc, item) => acc + item.cantidad, 0);
@@ -91,11 +109,13 @@ export function App() {
           <Route
             path="/checkout"
             element={
-              <Checkout
-                cartItems={cart}
-                user={user}
-                onCompleteOrder={handleCompleteOrder}
-              />
+              <ProtectedRoute user={user}>
+                <Checkout
+                  cartItems={cart}
+                  user={user}
+                  onCompleteOrder={handleCompleteOrder}
+                />
+              </ProtectedRoute>
             }
           />
 
@@ -103,9 +123,18 @@ export function App() {
           <Route path="/payment-failure" element={<PaymentFailure />} />
 
           <Route
-            path="/admin"
+            path="/mis-pedidos"
             element={
               <ProtectedRoute user={user}>
+                <MisPedidos />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute user={user} allowedRoles={['ADMIN', 'VENDEDOR']}>
                 <AdminDashboard />
               </ProtectedRoute>
             }

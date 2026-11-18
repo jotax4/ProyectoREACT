@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authService } from '../services/authService';
 
 export default function Checkout({ cartItems = [], user, onCompleteOrder }) {
   const navigate = useNavigate();
-
-  const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
-  const activeUser = user || storedUser;
+  const activeUser = user || authService.getCurrentUser();
 
   const [formData, setFormData] = useState({
     nombre: activeUser?.nombre || '',
@@ -68,11 +67,10 @@ export default function Checkout({ cartItems = [], user, onCompleteOrder }) {
 
     try {
       await onCompleteOrder(orderData);
-      alert('¡Compra procesada con éxito!');
       navigate('/payment-success');
     } catch (error) {
       console.error('Error al procesar el pedido:', error);
-      alert('Ocurrió un error al procesar la compra.');
+      alert('Ocurrió un error al procesar la compra. Verifica que tu sesión esté activa.');
     }
   };
 

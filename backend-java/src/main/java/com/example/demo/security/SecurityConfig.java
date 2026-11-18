@@ -57,8 +57,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/v1/productos/**", "/api/v1/categorias/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/productos/**", "/api/v1/categorias/**").hasRole("ADMIN")
 
-                // Órdenes/Pedidos: compra para usuarios autenticados; consulta y estados para ADMIN y VENDEDOR
+                // Órdenes/Pedidos: compra y consulta personal para usuarios autenticados; gestión global para ADMIN y VENDEDOR
                 .requestMatchers(HttpMethod.POST, "/api/v1/pedidos/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/v1/pedidos/mis-pedidos").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/pedidos/**").hasAnyRole("ADMIN", "VENDEDOR")
                 .requestMatchers(HttpMethod.PATCH, "/api/v1/pedidos/**").hasAnyRole("ADMIN", "VENDEDOR")
 
