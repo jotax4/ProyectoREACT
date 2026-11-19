@@ -1,20 +1,33 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// https://vitejs.dev
-// defineConfig: Macro de configuración nativa de Vite para habilitar tipados y autocompletado inteligente
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
-  plugins: [
-    react() // Habilita el soporte oficial de React (JSX, Fast Refresh) durante el desarrollo y compilación
-  ],
+  plugins: [react()],
   resolve: {
-    // Esto obliga a Vite a usar una sola copia de React y React DOM resolviendo el conflicto del "Invalid hook call"
-    dedupe: ['react', 'react-dom']
+    dedupe: ['react', 'react-dom'],
+    alias: {
+      react: path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
+      'react/jsx-runtime': path.resolve(__dirname, 'node_modules/react/jsx-runtime'),
+      'react/jsx-dev-runtime': path.resolve(__dirname, 'node_modules/react/jsx-dev-runtime'),
+    },
   },
   test: {
-    globals: true, // Permitee usaar métodos de testing (describe, it, expect, vi) globalmente sin importarlos en cada archivo
-    environment: 'jsdom', // Configura el entorno simulado de navegador (DOM de Node.js) indispensable para Testing Library
-    setupFiles: './src/setupTests.js',  // Define la ruta del archivo que inicializa y extiende configuraciones globales de testing
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.js',
+    deps: {
+      inline: [/react-router/, /@testing-library/],
+    },
+    server: {
+      deps: {
+        inline: [/react-router/, /@testing-library/],
+      },
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
